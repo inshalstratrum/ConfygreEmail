@@ -10,7 +10,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
   @override
   void initState() {
     super.initState();
@@ -19,6 +18,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final account = googleSignIn.currentUser;
+    final saved = objectBox?.getUserCredential();
+    final email = account?.email ?? saved?.userEmail ?? 'Not available';
+    final name = account?.displayName ?? email.split('@').first;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Padding(
@@ -27,8 +30,13 @@ class _ProfilePageState extends State<ProfilePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 20),
-            ProfileField(label: 'Email', value: googleSignIn.currentUser!.email.toString()),
-            ProfileField(label: 'Username', value: googleSignIn.currentUser!.displayName.toString()),
+            ProfileField(label: 'Email', value: email),
+            ProfileField(label: 'Username', value: name),
+            ProfileField(
+                label: 'OAuth',
+                value: objectBox?.getOAuthData()?.oAuthKey.isNotEmpty == true
+                    ? 'Configured'
+                    : 'Not configured'),
             Spacer(), // Pushes the button to the bottom
           ],
         ),

@@ -48,7 +48,7 @@ class _OauthSettingPageState extends State<OauthSettingPage> {
               TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  labelText: "oAuth API Key",
+                  labelText: "Google OAuth Web Client ID",
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -69,7 +69,7 @@ class _OauthSettingPageState extends State<OauthSettingPage> {
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
-                        OauthModel oauthModel = new OauthModel(useDefaultKey: false, oAuthKey: defaultOAuthKeyValue);
+                        OauthModel oauthModel = new OauthModel(useDefaultKey: false, oAuthKey: inputText);
                         objectBox?.updateOAuthModel(oauthModel);
                         Future.delayed(Duration(seconds: 1), () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));

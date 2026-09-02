@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:Confygre_Email/models/oauth_model.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/gmail/v1.dart';
@@ -11,14 +9,15 @@ import 'emails.dart';
 UserCredentialModel _userCredentialModel = UserCredentialModel(
     userEmail: userEmail ?? '',
     accessToken: userAccessToken ?? '',
-    idToken: userIdToken ?? ''
-);
+    idToken: userIdToken ?? '');
 
 Future<bool> authGoogle() async {
-
   googleSignIn = signInGoole();
 
   final googleUser = await googleSignIn.signIn();
+  if (googleUser == null) {
+    return false;
+  }
   final googleAuth = await googleUser!.authentication;
   final accessToken = googleAuth.accessToken;
   final idToken = googleAuth.idToken;
@@ -46,7 +45,7 @@ Future<bool> authGoogle() async {
   return true;
 }
 
-GoogleSignIn signInGoole(){
+GoogleSignIn signInGoole() {
   // const webClientId = '446415986013-4mg1uh7kptaodrt17rmv9mak0fv2n5hf.apps.googleusercontent.com'; //OG
   OauthModel? oauthModel = objectBox?.getOAuthData();
   String webClientId = oauthModel?.oAuthKey ?? defaultOAuthKeyValue; //confygre
@@ -57,26 +56,20 @@ GoogleSignIn signInGoole(){
   // const iosClientId = '584283423841-fc09qt6577ark3k7lvql1o7bjvdlqaqj.apps.googleusercontent.com';
   const iosClientId = '';
 
-  // Google sign in on Android will work without providing the Android
-  // Client ID registered on Google Cloud.
-
-  final GoogleSignIn googleSignIn = GoogleSignIn(
-    clientId: iosClientId,
-    serverClientId: webClientId,
-    scopes: <String>[
-      // GmailApi.gmailReadonlyScope,
-      GmailApi.gmailComposeScope,
-      GmailApi.gmailSendScope,
-      GmailApi.gmailModifyScope,
-      GmailApi.mailGoogleComScope
-    ]
-  );
+  final GoogleSignIn googleSignIn =
+      GoogleSignIn(serverClientId: webClientId, scopes: <String>[
+    // GmailApi.gmailReadonlyScope,
+    GmailApi.gmailComposeScope,
+    GmailApi.gmailSendScope,
+    GmailApi.gmailModifyScope,
+    GmailApi.mailGoogleComScope
+  ]);
 
   return googleSignIn;
 }
 
 void initSignIn() {
-  try{
+  try {
     // Ensure the user is signed in
     if (googleSignIn.currentUser == null) {
       googleSignIn.signIn();
@@ -85,7 +78,7 @@ void initSignIn() {
     } else {
       print("already signed in");
     }
-  } catch(e) {
+  } catch (e) {
     print(e);
   }
 }

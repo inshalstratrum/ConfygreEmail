@@ -25,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     googleSignIn = signInGoole();
 
     var userCred = objectBox?.getUserCredential();
-    if(userCred != null){
+    if (userCred != null) {
       // Initialize GoogleSignIn
       initSignIn();
     }
@@ -35,15 +35,16 @@ class _LoginPageState extends State<LoginPage> {
       print("signed in");
       print(googleSignIn.currentUser?.id);
       String userAccount = googleSignIn.currentUser?.email ?? "";
-      try{
+      try {
         getEmails();
-      } catch(e) {
-        try{
+      } catch (e) {
+        try {
           googleSignIn.signOut();
           objectBox?.removeUserCredential();
           gettingEmails = false;
           Future.delayed(Duration(seconds: 1), () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => LoginPage()));
           });
         } catch (ex) {
           print(ex);
@@ -80,7 +81,10 @@ class _LoginPageState extends State<LoginPage> {
               GestureDetector(
                 onTap: () => {
                   Future.delayed(Duration(seconds: 1), () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => OauthSettingPage()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => OauthSettingPage()));
                   })
                 },
                 child: Container(
@@ -89,45 +93,33 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: EdgeInsets.all(20),
-                  margin:
-                  EdgeInsets.only(bottom: 50), // Optional margin for spacing
+                  margin: EdgeInsets.only(
+                      bottom: 50), // Optional margin for spacing
                   child: Text(
                     'oAuth Setting',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
-              SizedBox(width: 15,),
+              SizedBox(
+                width: 15,
+              ),
               GestureDetector(
-                onTap: () {
-                  authGoogle();
-                  print("signed in");
-                  print(googleSignIn.currentUser?.id);
-                  String userAccount = googleSignIn.currentUser?.email ?? "";
-                  try{
-                    googleSignIn.onCurrentUserChanged.listen((data) async {
-                      print("signed in");
-                      print(googleSignIn.currentUser?.id);
-                      String userAccount = googleSignIn.currentUser?.email ?? "";
-                      try{
-                        getEmails();
-                      } catch(e) {
-                        print(e);
-                      }
-                      Navigator.push(
-                          context, MaterialPageRoute(builder: (context) => HomePage()));
-                    });
-                  } catch(e) {
-                    try{
-                      googleSignIn.signOut();
-                      objectBox?.removeUserCredential();
-                      gettingEmails = false;
-                      Future.delayed(Duration(seconds: 1), () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
-                      });
-                    } catch (ex) {
-                      print(ex);
-                    }
+                onTap: () async {
+                  try {
+                    final signedIn = await authGoogle();
+                    if (!mounted || !signedIn) return;
+                    await getEmails();
+                    if (!mounted) return;
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  } catch (error) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Google sign-in failed: $error')),
+                    );
                   }
                 },
                 child: Container(
@@ -136,8 +128,8 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: EdgeInsets.all(20),
-                  margin:
-                  EdgeInsets.only(bottom: 50), // Optional margin for spacing
+                  margin: EdgeInsets.only(
+                      bottom: 50), // Optional margin for spacing
                   child: Text(
                     'Sign In with Google',
                     style: TextStyle(color: Colors.white),

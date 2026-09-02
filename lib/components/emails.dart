@@ -26,7 +26,8 @@ String buildExclusionQuery(List<String> excludedEmails) {
     }
 
     // Construct exclusion query
-    String exclusionQuery = excludedEmails.map((email) => 'from:$email').join(' OR ');
+    String exclusionQuery =
+        excludedEmails.map((email) => 'from:$email').join(' OR ');
 
     // Return the complete query to exclude the emails
     return 'NOT ($exclusionQuery)';
@@ -36,9 +37,11 @@ String buildExclusionQuery(List<String> excludedEmails) {
 }
 
 Future<void> getEmails() async {
-  try{
+  try {
     print("getting emails");
     await Future.delayed(Duration.zero); // Ensures this runs asynchronously
+    emailDataList.clear();
+    messagesList.clear();
 
     // Get the authenticated headers (await is required)
     final authHeaders = await googleSignIn.currentUser?.authHeaders;
@@ -60,10 +63,9 @@ Future<void> getEmails() async {
     // Fetch messages
     do {
       String query = "";
-      if(!showSkippedEmails) {
-        if(excludedEmails.length > 0)
-          excludedEmails.clear();
-        if(skippedEmails != null) {
+      if (!showSkippedEmails) {
+        if (excludedEmails.length > 0) excludedEmails.clear();
+        if (skippedEmails != null) {
           excludedEmails.addAll(skippedEmails!.map((e) => e.email).toList());
           query = buildExclusionQuery(excludedEmails);
         }
@@ -71,17 +73,14 @@ Future<void> getEmails() async {
 
       gMail.ListMessagesResponse results;
 
-      if(query.length == 0){
+      if (query.length == 0) {
         results = await gmailApi.users.messages.list(
-            "me",
-            pageToken: nextPageToken,
+          "me",
+          pageToken: nextPageToken,
         );
       } else {
-        results = await gmailApi.users.messages.list(
-            "me",
-            pageToken: nextPageToken,
-            q: query
-        );
+        results = await gmailApi.users.messages
+            .list("me", pageToken: nextPageToken, q: query);
       }
 
       //Check if results.messages is not null before iterating
@@ -90,6 +89,7 @@ Future<void> getEmails() async {
           gMail.Message detailedMessage = await gmailApi.users.messages.get(
               "me", message.id!,
               $fields: "payload(headers),labelIds,threadId");
+          messagesList.add(detailedMessage);
 
           // Extract headers for subject, sender, etc.
           var headers = detailedMessage.payload?.headers;
@@ -110,20 +110,29 @@ Future<void> getEmails() async {
 
                 emailData.senderEmail = emailStringModel?.email;
                 emailData.senderName = emailStringModel?.name;
-              } else if (header.name == "List-Unsubscribe-Post" && header.value == "List-Unsubscribe=One-Click") {
+              } else if (header.name == "List-Unsubscribe-Post" &&
+                  header.value == "List-Unsubscribe=One-Click") {
                 emailData.isOneClickUnsub = true;
-              } else if(header.name == "List-Unsubscribe") {
+              } else if (header.name == "List-Unsubscribe") {
                 //process string
-                ParseUnsubscribeStringModel parseUnsubscribeStringResult = parseUnsubscribeString(header.value ?? "");
-                emailData.mailToString = parseUnsubscribeStringResult.mailToString;
-                emailData.mailToSubject = parseUnsubscribeStringResult.mailToSubject;
-                emailData.directString = parseUnsubscribeStringResult.directString;
+                ParseUnsubscribeStringModel parseUnsubscribeStringResult =
+                    parseUnsubscribeString(header.value ?? "");
+                emailData.mailToString =
+                    parseUnsubscribeStringResult.mailToString;
+                emailData.mailToSubject =
+                    parseUnsubscribeStringResult.mailToSubject;
+                emailData.directString =
+                    parseUnsubscribeStringResult.directString;
+              } else if (header.name == "Subject") {
+                emailData.subject = header.value ?? "";
               }
             }
           }
 
-          print("${emailDataList.containsKey(emailStringModel?.email)} (${emailData.isOneClickUnsub} || ${showOnlyUnsubscribableEmails})");
-          if (!emailDataList.containsKey(emailStringModel?.email) && (emailData.isOneClickUnsub || !showOnlyUnsubscribableEmails)) {
+          print(
+              "${emailDataList.containsKey(emailStringModel?.email)} (${emailData.isOneClickUnsub} || ${showOnlyUnsubscribableEmails})");
+          if (!emailDataList.containsKey(emailStringModel?.email) &&
+              (emailData.isOneClickUnsub || !showOnlyUnsubscribableEmails)) {
             print("in");
             // Extract labels and flags
             emailData.isStared = false;
@@ -157,7 +166,7 @@ Future<void> getEmails() async {
       nextPageToken = results.nextPageToken;
     } while (nextPageToken != null && await googleSignIn.isSignedIn());
 
-    if(!await googleSignIn.isSignedIn())
+    if (!await googleSignIn.isSignedIn())
       print("signed out");
     else
       print("closed loop");
@@ -189,18 +198,36 @@ Future<int> getEmailCount(String emailAddress) async {
     gMail.ListMessagesResponse response = await gmailApi.users.messages.list(
       "me",
       q: 'from:$emailAddress',
-      pageToken: nextPageTokenForSingleMail, // Use the token to get the next page
+      pageToken:
+          nextPageTokenForSingleMail, // Use the token to get the next page
     );
 
     // Add the number of messages retrieved in the current response
     count += response.messages?.length ?? 0;
 
-    emailIdsToDelete.addAll(response.messages?.map((message) => message.id!).toList() ?? []);
+    emailIdsToDelete.addAll(
+        response.messages?.map((message) => message.id!).toList() ?? []);
 
     // Update the nextPageToken for the next iteration
     nextPageTokenForSingleMail = response.nextPageToken;
-  } while (nextPageTokenForSingleMail != null); // Continue until there are no more pages
+  } while (nextPageTokenForSingleMail !=
+      null); // Continue until there are no more pages
 
+  return count;
+}
+
+Future<int> getUnreadEmailCount(String emailAddress) async {
+  String? nextPageTokenForUnread;
+  int count = 0;
+  do {
+    final response = await gmailApi.users.messages.list(
+      'me',
+      q: 'from:$emailAddress is:unread',
+      pageToken: nextPageTokenForUnread,
+    );
+    count += response.messages?.length ?? 0;
+    nextPageTokenForUnread = response.nextPageToken;
+  } while (nextPageTokenForUnread != null);
   return count;
 }
 
@@ -225,19 +252,60 @@ Future<List<String>> getBulkEmailList(String email) async {
   return emailIds;
 }
 
+Future<List<gMail.Message>> listMailboxMessages({
+  String query = '',
+  int maxResults = 50,
+}) async {
+  final response = await gmailApi.users.messages.list(
+    'me',
+    q: query.isEmpty ? null : query,
+    maxResults: maxResults,
+  );
+  final summaries = response.messages ?? <gMail.Message>[];
+  final details = <gMail.Message>[];
+  for (final summary in summaries) {
+    if (summary.id == null) continue;
+    details.add(
+        await gmailApi.users.messages.get('me', summary.id!, format: 'full'));
+  }
+  return details;
+}
+
+Future<void> emptyTrash() async {
+  await gmailApi.users.emptyTrash('me');
+}
+
+Future<void> deleteSelectedMessages(List<String> ids) async {
+  if (ids.isEmpty) return;
+  if (permanentDelete) {
+    await gmailApi.users.messages.batchDelete(
+      gMail.BatchDeleteMessagesRequest(ids: ids),
+      'me',
+    );
+  } else {
+    await gmailApi.users.messages.batchModify(
+      gMail.BatchModifyMessagesRequest(ids: ids, addLabelIds: ['TRASH']),
+      'me',
+    );
+  }
+}
+
 ParseUnsubscribeStringModel parseUnsubscribeString(String input) {
   String? mailToString;
   String? mailSubject = "dummy subject"; // Default value for mailSubject
   String? directString;
 
-  ParseUnsubscribeStringModel parseUnsubscribeStringModel = new ParseUnsubscribeStringModel();
+  ParseUnsubscribeStringModel parseUnsubscribeStringModel =
+      new ParseUnsubscribeStringModel();
 
   // Split the input by commas to get individual entries
   final parts = input.split(',');
 
   // Regex to detect mailto and URL
-  final mailtoRegex = RegExp(r'mailto:([^>\?]+)'); // Extracts email before `?` or `>`
-  final subjectRegex = RegExp(r'subject=([^>\&]+)'); // Extracts subject after `subject=` excluding trailing `>` or `&`
+  final mailtoRegex =
+      RegExp(r'mailto:([^>\?]+)'); // Extracts email before `?` or `>`
+  final subjectRegex = RegExp(
+      r'subject=([^>\&]+)'); // Extracts subject after `subject=` excluding trailing `>` or `&`
   final urlRegex = RegExp(r'https?://[^\s,>]+');
 
   for (var part in parts) {
@@ -267,10 +335,9 @@ ParseUnsubscribeStringModel parseUnsubscribeString(String input) {
   // print('Direct String: $directString');
 
   return parseUnsubscribeStringModel;
-
 }
 
-void deleteEmail(List<String> messageIds) async {
+Future<void> deleteEmail(List<String> messageIds) async {
   //Permanently Delete
   // try{
   //   await gmailApi.users.messages.batchDelete(
@@ -295,29 +362,31 @@ void deleteEmail(List<String> messageIds) async {
   }
 }
 
-void blockEmail(String email){
+void blockEmail(String email) {}
 
-}
-
-void unSubEmail(String mailToString, String mailToSubject, String directString) async {
+Future<void> unSubEmail(
+    String mailToString, String mailToSubject, String directString) async {
   String currentUserEmail = googleSignIn.currentUser!.email;
   String body = "This message was automatically generated by Confygre Email.";
-  if(mailToString.length != 0 && currentUserEmail.length != 0){
-    if(mailToSubject.length != 0) {
-      final rawMessage = createEmail(currentUserEmail, mailToString, mailToSubject, body);
+  if (mailToString.length != 0 && currentUserEmail.length != 0) {
+    if (mailToSubject.length != 0) {
+      final rawMessage =
+          createEmail(currentUserEmail, mailToString, mailToSubject, body);
       final message = gMail.Message()..raw = rawMessage;
       await gmailApi.users.messages.send(message, 'me');
     } else {
-      final rawMessage = createEmail(currentUserEmail, mailToString, "unsubscribe", body);
+      final rawMessage =
+          createEmail(currentUserEmail, mailToString, "unsubscribe", body);
       final message = gMail.Message()..raw = rawMessage;
       await gmailApi.users.messages.send(message, 'me');
     }
-  } else if(directString.length != 0 && currentUserEmail.length != 0) {
+  } else if (directString.length != 0 && currentUserEmail.length != 0) {
     callWebPage(directString);
   }
 }
 
-String createEmail(String sender, String recipient, String subject, String body) {
+String createEmail(
+    String sender, String recipient, String subject, String body) {
   final message = StringBuffer();
   message.writeln('From: $sender');
   message.writeln('To: $recipient');
