@@ -190,6 +190,35 @@ Future<void> getEmails() async {
   }
 }
 
+Future<List<gMail.Message>> listMailboxMessages({String query = ''}) async {
+  final results = <gMail.Message>[];
+  String? token;
+  do {
+    final response = await gmailApi.users.messages.list('me', q: query.isEmpty ? null : query, pageToken: token, maxResults: 100);
+    for (final summary in response.messages ?? const <gMail.Message>[]) {
+      if (summary.id == null) continue;
+      results.add(await gmailApi.users.messages.get('me', summary.id!, format: 'full'));
+    }
+    token = response.nextPageToken;
+  } while (token != null && results.length < 500);
+  return results;
+}
+
+Future<void> deleteSelectedMessages(List<String> messageIds) async {
+  await deleteEmail(messageIds);
+}
+
+Future<int> getUnreadEmailCount(String email) async {
+  int count = 0;
+  String? token;
+  do {
+    final response = await gmailApi.users.messages.list('me', q: 'from:$email is:unread', pageToken: token, maxResults: 100);
+    count += response.messages?.length ?? 0;
+    token = response.nextPageToken;
+  } while (token != null);
+  return count;
+}
+
 class GoogleAuthClient extends http.BaseClient {
   final Map<String, String> _headers;
 
