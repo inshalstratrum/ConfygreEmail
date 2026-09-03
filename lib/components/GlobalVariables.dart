@@ -9,7 +9,7 @@ import '../objectbox.g.dart';
 import 'objectBox.dart';
 import 'package:intl/intl.dart';
 
-late GoogleSignIn googleSignIn;
+GoogleSignIn googleSignIn = GoogleSignIn();
 
 String emailId = "";
 String emailSubject = "";
