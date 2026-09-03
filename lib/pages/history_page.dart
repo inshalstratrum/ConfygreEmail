@@ -30,14 +30,14 @@ class _HistoryPageState extends State<HistoryPage> {
       unsubscribedEmails = objectBox?.getUnsubscribedEmailsList();
       skippedEmails = objectBox?.getSkippedEmailsList();
       finalList = List.from(unsubscribedEmails ?? []);
-      totalUnsubscribedEmailsCount = unsubscribedEmails?.length ?? 0;
+      totalUnsubscribedEmailsCount = (unsubscribedEmails ?? [])
+          .fold(0, (total, item) => total + item.count);
       totalskippedEmailsCount = skippedEmails?.length ?? 0;
     });
   }
 
   void navigationBetweenList(int index) {
     setState(() {
-
       if (index == 0) {
         listHeading = "Unsubscribed Email List";
         finalList = List.from(unsubscribedEmails ?? []);
@@ -144,67 +144,81 @@ class _HistoryPageState extends State<HistoryPage> {
                   itemCount: finalList?.length ?? 0,
                   scrollDirection: Axis.vertical,
                   itemBuilder: (context, index) {
-                    if(listHeading == "Unsubscribed Email List"){
-                      final emailModel = finalList![index] as UnsubscribedEmailHisotryModel;
+                    if (listHeading == "Unsubscribed Email List") {
+                      final emailModel =
+                          finalList![index] as UnsubscribedEmailHisotryModel;
                       return Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 5.0),
                             child: Text(
-                              emailModel.email + ' : ' + emailModel.count.toString(),
+                              emailModel.email +
+                                  ' : ' +
+                                  emailModel.count.toString(),
                               style: TextStyle(fontSize: 20),
                             ),
                           )
                         ],
                       );
                     } else {
-                      final emailModel = finalList![index] as SkippedEmailsHistoryModel;
+                      final emailModel =
+                          finalList![index] as SkippedEmailsHistoryModel;
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    emailModel.email,
-                                    style: TextStyle(fontSize: 20),
-                                    overflow: TextOverflow.ellipsis, // Handles long text gracefully
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      emailModel.email,
+                                      style: TextStyle(fontSize: 20),
+                                      overflow: TextOverflow
+                                          .ellipsis, // Handles long text gracefully
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 8), // Optional spacing between the text and the container
-                                GestureDetector(
-                                  onTap: () async {
-                                    if(totalskippedEmailsCount > 0) {
-                                      bool? result = await objectBox?.removeSkippedEmail(emailModel.email);
-                                      if(result ?? false){
-                                        setState(() {
-                                          totalskippedEmailsCount -= 1;
-                                        });
-                                        SnackBar snackBar = SnackBar(
-                                          duration: Duration(seconds: 1),
-                                          content: Text("${emailModel.email} removed"),
-                                        );
-                                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                  SizedBox(
+                                      width:
+                                          8), // Optional spacing between the text and the container
+                                  GestureDetector(
+                                    onTap: () async {
+                                      if (totalskippedEmailsCount > 0) {
+                                        bool? result =
+                                            await objectBox?.removeSkippedEmail(
+                                                emailModel.email);
+                                        if (result ?? false) {
+                                          setState(() {
+                                            totalskippedEmailsCount -= 1;
+                                          });
+                                          SnackBar snackBar = SnackBar(
+                                            duration: Duration(seconds: 1),
+                                            content: Text(
+                                                "${emailModel.email} removed"),
+                                          );
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(snackBar);
+                                        }
                                       }
-                                    }
-                                  },
-                                  child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Add padding inside the container
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        borderRadius: BorderRadius.circular(8), // Optional: rounded corners
-                                      ),
-                                      child: Icon(Icons.remove_circle_rounded)
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
-                        )
-                      );
-
+                                    },
+                                    child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical:
+                                                6), // Add padding inside the container
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          borderRadius: BorderRadius.circular(
+                                              8), // Optional: rounded corners
+                                        ),
+                                        child:
+                                            Icon(Icons.remove_circle_rounded)),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ));
                     }
                   }),
             ),
