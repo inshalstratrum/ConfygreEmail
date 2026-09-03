@@ -50,6 +50,11 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUnsubscribed = objectBox?.getUnsubscribedEmailsList() ?? <UnsubscribedEmailHisotryModel>[];
+    final currentSkipped = objectBox?.getSkippedEmailsList() ?? <SkippedEmailsHistoryModel>[];
+    final visibleList = _selectedHistoryPageIndex == 0 ? currentUnsubscribed : currentSkipped;
+    final unsubscribedCount = currentUnsubscribed.length;
+    final skippedCount = currentSkipped.length;
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Column(
@@ -79,7 +84,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             style: TextStyle(fontSize: 10, color: Colors.black),
                           ),
                           Text(
-                            totalUnsubscribedEmailsCount.toString(),
+                            unsubscribedCount.toString(),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -110,7 +115,7 @@ class _HistoryPageState extends State<HistoryPage> {
                           style: TextStyle(fontSize: 10, color: Colors.white),
                         ),
                         Text(
-                          totalskippedEmailsCount.toString(),
+                            skippedCount.toString(),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -141,11 +146,11 @@ class _HistoryPageState extends State<HistoryPage> {
             child: Padding(
               padding: const EdgeInsets.only(top: 10.0),
               child: ListView.builder(
-                  itemCount: finalList?.length ?? 0,
+                  itemCount: visibleList.length,
                   scrollDirection: Axis.vertical,
                   itemBuilder: (context, index) {
                     if(listHeading == "Unsubscribed Email List"){
-                      final emailModel = finalList![index] as UnsubscribedEmailHisotryModel;
+                      final emailModel = visibleList[index] as UnsubscribedEmailHisotryModel;
                       return Column(
                         children: [
                           Padding(
@@ -158,7 +163,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         ],
                       );
                     } else {
-                      final emailModel = finalList![index] as SkippedEmailsHistoryModel;
+                      final emailModel = visibleList[index] as SkippedEmailsHistoryModel;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(

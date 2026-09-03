@@ -6,6 +6,7 @@ import '../pages/home_page.dart';
 
 import '../components/GlobalVariables.dart';
 import '../components/objectBox.dart';
+import '../components/emails.dart';
 import '../models/app_settings_model.dart';
 import '../objectbox.g.dart';
 
@@ -62,6 +63,15 @@ class _AppSettingsState extends State<AppSettings> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SwitchListTile(
+              title: const Text('Permanent delete'),
+              subtitle: const Text('Delete instead of moving messages to Trash'),
+              activeColor: Colors.blueAccent,
+              value: permanentDelete,
+              onChanged: (bool value) {
+                setState(() { permanentDelete = value; updateToLocalDB(); });
+              },
+            ),
             // First toggle switch
             // SwitchListTile(
             //   title: Text(
@@ -141,6 +151,20 @@ class _AppSettingsState extends State<AppSettings> {
                   updateToLocalDB();
                 });
               },
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.delete_sweep),
+                label: const Text('Clear all messages from Trash'),
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(context: context, builder: (_) => AlertDialog(title: const Text('Empty Trash?'), content: const Text('This permanently deletes every message currently in Gmail Trash.'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Empty Trash'))]));
+                  if (confirmed == true) {
+                    try { await emptyTrash(); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trash emptied'))); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not empty Trash: $e'))); }
+                  }
+                },
+              ),
             ),
           ],
         ),

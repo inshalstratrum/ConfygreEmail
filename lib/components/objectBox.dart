@@ -170,7 +170,7 @@ class ObjectBox {
     addBulkEmailsToCheckedEmails(emailIds);
 
     //addEmailToCheckedEmails(emailId);
-    skippedEmails?.add(new SkippedEmailsHistoryModel(email: emailId));
+    skippedEmails?.add(new SkippedEmailsHistoryModel(email: email));
   }
 
   Future<bool> removeSkippedEmail(String email) async {
@@ -184,7 +184,7 @@ class ObjectBox {
       query1.close();
       if(result1 != null) {
         _skippedEmailListBox.remove(result1.id);
-        skippedEmails?.remove(new SkippedEmailsHistoryModel(email: email));
+        skippedEmails?.removeWhere((item) => item.email == email);
       }
 
       emailList.forEach((emailId) {

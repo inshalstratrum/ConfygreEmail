@@ -49,6 +49,18 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _runConnectionTest() async {
+    String result;
+    try {
+      final profile = await gmailApi.users.getProfile('me');
+      result = 'Connection successful\\nAccount: ${profile.emailAddress}\\nMessages: ${profile.messagesTotal ?? 0}';
+    } catch (e) {
+      result = 'Connection failed\\n$e';
+    }
+    if (!mounted) return;
+    showDialog(context: context, builder: (_) => AlertDialog(title: const Text('Gmail connection test'), content: Text(result), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))]));
+  }
+
   final List<Widget> _pages = [
     const Tiles(),
     const HistoryPage(),
@@ -161,12 +173,12 @@ class _HomePageState extends State<HomePage> {
               //   ),
               // ),
               GestureDetector(
-                onTap: () {
-                },
+                onTap: _runConnectionTest,
                 child: const Padding(
-                  padding: const EdgeInsets.only(left: 25.0),
+                  padding: EdgeInsets.only(left: 25.0),
                   child: ListTile(
-                    title: Text('Test', style: TextStyle(color: Colors.white, fontSize: 25),),
+                    leading: Icon(Icons.health_and_safety, color: Colors.white),
+                    title: Text('Test connection', style: TextStyle(color: Colors.white, fontSize: 25),),
                   ),
                 ),
               ),

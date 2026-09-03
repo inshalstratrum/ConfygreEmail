@@ -52,6 +52,7 @@ bool blockTheSender = true;
 bool deleteAllMailsFromTheSender = true;
 bool showSkippedEmails = false;
 bool showOnlyUnsubscribableEmails = false;
+String selectedMailFilter = 'Inbox';
 
 // Profile
 String? userEmail;

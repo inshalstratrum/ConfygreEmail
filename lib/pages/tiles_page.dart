@@ -9,6 +9,7 @@ import '../models/email_string_model.dart';
 import 'login_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'mail_list_page.dart';
 
 class Tiles extends StatefulWidget {
   const Tiles({super.key});
@@ -237,6 +238,20 @@ class _TilesState extends State<Tiles> {
     }
   }
 
+  Future<void> unsubscribeOnly(String email) async {
+    if (email.isEmpty) return;
+    setState(() => canGetNextRequest = false);
+    await unSubEmail(mailToString, mailToSubject, directString);
+    objectBox?.addUnsubscribedEmail(email, numberOfEmailsAvailable, emailId);
+    emailDataList.remove(email);
+    setState(() {
+      unsubscribedToday += 1;
+      objectBox?.updateTilesData(unsubscribedToday, skippedToday, deletedToday);
+      canGetNextRequest = true;
+    });
+    showEmailDataOrWait();
+  }
+
   void skipEmail(String email, String emailId) async {
     if(email.length > 0) {
       List<String> bulkEmailList = await getBulkEmailList(email);
@@ -285,6 +300,21 @@ class _TilesState extends State<Tiles> {
       body: Column(
         children: [
           //Today Count
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('View: ', style: TextStyle(fontWeight: FontWeight.bold)),
+              DropdownButton<String>(
+                value: selectedMailFilter,
+                items: const ['Inbox', 'Promotions', 'Updates', 'Personal', 'Social', 'Important', 'Purchases', 'Sent', 'Drafts', 'Trash', 'Spam'].map((filter) => DropdownMenuItem(value: filter, child: Text(filter))).toList(),
+                onChanged: (value) {
+                  if (value == null || value == selectedMailFilter) return;
+                  setState(() { selectedMailFilter = value; emailDataList.clear(); gettingEmails = false; });
+                  showEmailDataOrWait();
+                },
+              ),
+            ],
+          ),
           Text("Today's Data"),
           Padding(
             padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
@@ -426,17 +456,7 @@ class _TilesState extends State<Tiles> {
                                       const SizedBox(width: 5),
                                       GestureDetector(
                                         onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: Text(
-                                                emailSenderEmail,
-                                                style: TextStyle(fontSize: 15),
-                                              ),
-                                              content: Text(
-                                                  'asdasdasd\nasdasdasd aasdasd\nasdasdasd'),
-                                            ),
-                                          );
+                                          Navigator.push(context, MaterialPageRoute(builder: (_) => MailListPage(sender: emailSenderEmail)));
                                         },
                                         child: Text.rich(TextSpan(children: [
                                           TextSpan(
@@ -495,6 +515,23 @@ class _TilesState extends State<Tiles> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 10,),
+                      if (isOneClickUnsub)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: canGetNextRequest ? () => unsubscribeOnly(emailSenderEmail) : null,
+                                child: Container(
+                                  height: 46,
+                                  decoration: BoxDecoration(color: Colors.deepPurple, borderRadius: BorderRadius.circular(12)),
+                                  alignment: Alignment.center,
+                                  child: const Text('Unsubscribe only', style: TextStyle(color: Colors.white, fontSize: 15)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: 10,),
                       Row( // Buttons at the bottom
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
