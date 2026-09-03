@@ -47,18 +47,17 @@ class ObjectBox {
   bool getPlaystoreRatingModel() {
     final response = _playstoreRatingModel.getAll();
     if (response.isNotEmpty) {
-      if (response[0].neverShowAgain)
+      if(response[0].neverShowAgain)
         return false;
       else {
-        if (response[0].dateIfNot != dateTimeInUTC &&
-            response[0].showAtCount == unsubscribedToday) {
+        if(response[0].dateIfNot != dateTimeInUTC && response[0].showAtCount == unsubscribedToday){
           return true;
         } else
           return false;
       }
-    } else {
-      PlaystoreRatingModel playstoreRatingModel = new PlaystoreRatingModel(
-          neverShowAgain: false, showAtCount: 10, dateIfNot: "000000");
+    }
+    else {
+      PlaystoreRatingModel playstoreRatingModel = new PlaystoreRatingModel(neverShowAgain: false, showAtCount: 10, dateIfNot: "000000");
       _playstoreRatingModel.put(playstoreRatingModel);
       return false;
     }
@@ -66,7 +65,7 @@ class ObjectBox {
 
   void updatePlaystoreRatingModel(bool neverShow) {
     final response = _playstoreRatingModel.getAll();
-    if (response != null) {
+    if(response != null){
       response[0].dateIfNot = dateTimeInUTC;
       response[0].neverShowAgain = neverShow;
       _playstoreRatingModel.put(response[0]);
@@ -77,9 +76,8 @@ class ObjectBox {
     final response = _componentsCacheModel.getAll();
     if (response.isNotEmpty)
       return true;
-    else {
-      ComponentsCacheModel componentsCacheModel =
-          new ComponentsCacheModel(introductionScreen: true);
+    else{
+      ComponentsCacheModel componentsCacheModel = new ComponentsCacheModel(introductionScreen: true);
       _componentsCacheModel.put(componentsCacheModel);
       return false;
     }
@@ -96,7 +94,8 @@ class ObjectBox {
   }
 
   int? updateUserCredential(UserCredentialModel userCredentialModel) {
-    if (getUserCredential() != null) userCredentialModel.id = 1;
+    if(getUserCredential() != null)
+      userCredentialModel.id = 1;
     _userCredentialBox.put(userCredentialModel);
   }
 
@@ -120,7 +119,8 @@ class ObjectBox {
   }
 
   int? updateAppSettings(AppSettingsModel appSettingsModel) {
-    if (getAppSettings() != null) appSettingsModel.id = 1;
+    if(getAppSettings() != null)
+      appSettingsModel.id = 1;
     _appSettingsBox.put(appSettingsModel);
   }
 
@@ -135,31 +135,20 @@ class ObjectBox {
   }
 
   int? addUnsubscribedEmail(String email, int count, String emailId) {
-    final query = _unsubscribedEmailListBox
-        .query(UnsubscribedEmailHisotryModel_.email.equals(email))
-        .build();
-    final existing = query.findFirst();
-    query.close();
-    final model = UnsubscribedEmailHisotryModel(
-      id: existing?.id ?? 0,
-      email: email,
-      count: (existing?.count ?? 0) + count,
+    _unsubscribedEmailListBox.put(
+      new UnsubscribedEmailHisotryModel(email: email, count: count)
     );
-    _unsubscribedEmailListBox.put(model);
-    if (emailId.isNotEmpty) addEmailToCheckedEmails(emailId);
-    unsubscribedEmails = _unsubscribedEmailListBox.getAll();
-    return model.id;
+    //addEmailToCheckedEmails(emailId);
+    unsubscribedEmails?.add(new UnsubscribedEmailHisotryModel(email: email, count: count));
   }
 
   bool checkUnsubscribedEmail(String email) {
-    final query = _unsubscribedEmailListBox
-        .query(UnsubscribedEmailHisotryModel_.email.equals(email))
-        .build();
+    final query = _unsubscribedEmailListBox.query(UnsubscribedEmailHisotryModel_.email.equals(email)).build();
     final UnsubscribedEmailHisotryModel? result = query.findFirst();
     query.close();
-    if (result == null)
+    if(result == null)
       return true;
-    else // Always close the query after use
+    else// Always close the query after use
       return false;
   }
 
@@ -173,101 +162,83 @@ class ObjectBox {
   }
 
   int? addSkippedEmail(String email, List<String> emailIds) {
-    final query = _skippedEmailListBox
-        .query(SkippedEmailsHistoryModel_.email.equals(email))
-        .build();
-    final existing = query.findFirst();
-    query.close();
-    _skippedEmailListBox.put(SkippedEmailsHistoryModel(
-      id: existing?.id ?? 0,
-      email: email,
-    ));
+    _skippedEmailListBox.put(
+        new SkippedEmailsHistoryModel(email: email)
+    );
 
     //add all the emails via bulkAddMethod
     addBulkEmailsToCheckedEmails(emailIds);
 
     //addEmailToCheckedEmails(emailId);
-    skippedEmails = _skippedEmailListBox.getAll();
-    return emailIds.length;
+    skippedEmails?.add(new SkippedEmailsHistoryModel(email: email));
   }
 
   Future<bool> removeSkippedEmail(String email) async {
-    try {
+    try{
       List<String> emailList = await getBulkEmailList(email);
-      if (emailList.isEmpty) return false; // Return early if the list is empty
+      if (emailList.isEmpty)
+        return false; // Return early if the list is empty
 
-      final query1 = _skippedEmailListBox
-          .query(SkippedEmailsHistoryModel_.email.equals(email))
-          .build();
+      final query1 = _skippedEmailListBox.query(SkippedEmailsHistoryModel_.email.equals(email)).build();
       final SkippedEmailsHistoryModel? result1 = query1.findFirst();
       query1.close();
-      if (result1 != null) {
+      if(result1 != null) {
         _skippedEmailListBox.remove(result1.id);
-        skippedEmails?.remove(new SkippedEmailsHistoryModel(email: email));
+        skippedEmails?.removeWhere((item) => item.email == email);
       }
 
       emailList.forEach((emailId) {
-        final query2 = _checkedEmails
-            .query(CheckedEmailsModel_.emailIds.equals(emailId))
-            .build();
+        final query2 = _checkedEmails.query(CheckedEmailsModel_.emailIds.equals(emailId)).build();
         final CheckedEmailsModel? result2 = query2.findFirst();
         query2.close();
-        if (result2 != null) _checkedEmails.remove(result2.id);
+        if(result2 != null)
+          _checkedEmails.remove(result2.id);
       });
 
       return true;
+
     } catch (e) {
       return false;
     }
   }
 
   bool checkSkippedEmail(String email) {
-    final query = _skippedEmailListBox
-        .query(SkippedEmailsHistoryModel_.email.equals(email))
-        .build();
+    final query = _skippedEmailListBox.query(SkippedEmailsHistoryModel_.email.equals(email)).build();
     final SkippedEmailsHistoryModel? result = query.findFirst();
     query.close();
-    if (result == null)
+    if(result == null)
       return true;
-    else // Always close the query after use
+    else// Always close the query after use
       return false;
   }
 
   //Tiles page data
   TilesDataModel? getTilesData(String date) {
-    final query =
-        _tilesDataBox.query(TilesDataModel_.dateTimeInUTC.equals(date)).build();
+    final query = _tilesDataBox.query(TilesDataModel_.dateTimeInUTC.equals(date)).build();
     final TilesDataModel? result = query.findFirst();
     query.close(); // Always close the query after use
     return result;
   }
 
-  int? updateTilesData(
-      int unsubscribedToday, int skippedToday, int deletedToday) {
+  int? updateTilesData(int unsubscribedToday, int skippedToday, int deletedToday) {
     TilesDataModel? tilesData = getTilesData(dateTimeInUTC);
-    if (tilesData != null) {
-      _tilesDataBox.put(new TilesDataModel(
-          id: tilesData.id,
-          dateTimeInUTC: dateTimeInUTC,
-          unsubscribed: unsubscribedToday,
-          deleted: deletedToday,
-          skipped: skippedToday));
+    if(tilesData != null) {
+      _tilesDataBox.put(new TilesDataModel(id: tilesData.id, dateTimeInUTC: dateTimeInUTC, unsubscribed: unsubscribedToday, deleted: deletedToday, skipped: skippedToday));
     } else {
-      _tilesDataBox.put(new TilesDataModel(
-          dateTimeInUTC: dateTimeInUTC,
-          unsubscribed: unsubscribedToday,
-          deleted: deletedToday,
-          skipped: skippedToday));
+      _tilesDataBox.put(new TilesDataModel(dateTimeInUTC: dateTimeInUTC, unsubscribed: unsubscribedToday, deleted: deletedToday, skipped: skippedToday));
     }
   }
 
   //Checked EMails
   int? addEmailToCheckedEmails(String emailIds) {
-    _checkedEmails.put(new CheckedEmailsModel(emailIds: emailIds));
+    _checkedEmails.put(
+        new CheckedEmailsModel(emailIds: emailIds)
+    );
   }
 
   bool addBulkEmailsToCheckedEmails(List<String> emailIds) {
-    if (emailIds.isEmpty) return false; // Return early if the list is empty
+    if (emailIds.isEmpty)
+      return false; // Return early if the list is empty
 
     // Create a list of CheckedEmailsModel objects
     final List<CheckedEmailsModel> models = emailIds
@@ -276,7 +247,8 @@ class ObjectBox {
 
     // Use putMany to add all models at once
     var result = _checkedEmails.putMany(models);
-    if (result.length != 0) return true;
+    if(result.length != 0)
+      return true;
     return false;
   }
 
@@ -291,16 +263,15 @@ class ObjectBox {
 
     // Use putMany to add all models at once
     var result = _skippedEmailListBox.putMany(models);
-    if (result.length != 0) return true;
+    if(result.length != 0)
+      return true;
     return false;
   }
 
   int? removeEmailFromCheckedEmails(List<String> emailIds) {
     if (emailIds.isEmpty) return 0; // Return early if the list is empty
 
-    final query = _checkedEmails
-        .query(CheckedEmailsModel_.emailIds.oneOf(emailIds))
-        .build();
+    final query = _checkedEmails.query(CheckedEmailsModel_.emailIds.oneOf(emailIds)).build();
 
     final List<CheckedEmailsModel> results = query.find();
     query.close();
@@ -316,14 +287,12 @@ class ObjectBox {
 
   bool checkCheckedEmailList(String emailIds) {
     final settings = _checkedEmails.getAll();
-    final query = _checkedEmails
-        .query(CheckedEmailsModel_.emailIds.equals(emailIds))
-        .build();
+    final query = _checkedEmails.query(CheckedEmailsModel_.emailIds.equals(emailIds)).build();
     final CheckedEmailsModel? result = query.findFirst();
     query.close();
-    if (result == null)
+    if(result == null)
       return true;
-    else // Always close the query after use
+    else// Always close the query after use
       return false;
   }
 
@@ -338,7 +307,8 @@ class ObjectBox {
   }
 
   int? updateOAuthModel(OauthModel oAuth) {
-    if (getOAuthData() != null) oAuth.id = 1;
+    if(getOAuthData() != null)
+      oAuth.id = 1;
     _oauthModel.put(oAuth);
   }
 }

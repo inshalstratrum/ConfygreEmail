@@ -10,19 +10,21 @@ class OauthSettingPage extends StatefulWidget {
 }
 
 class _OauthSettingPageState extends State<OauthSettingPage> {
+  late final TextEditingController _controller;
+
   @override
   void initState() {
     super.initState();
-    setState(() {
-      //Get data from localDB
-      OauthModel? oauthModel = objectBox?.getOAuthData();
-      if(oauthModel != null){
-        oAuthKeyValue = oauthModel.oAuthKey;
-      }
-    });
+    final saved = objectBox?.getOAuthData();
+    oAuthKeyValue = saved?.useDefaultKey == true ? defaultOAuthKeyValue : (saved?.oAuthKey ?? '');
+    _controller = TextEditingController(text: oAuthKeyValue);
   }
 
-  final TextEditingController _controller = TextEditingController(text: oAuthKeyValue);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class _OauthSettingPageState extends State<OauthSettingPage> {
               TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  labelText: "Google OAuth Web Client ID",
+                  labelText: "oAuth API Key",
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -69,7 +71,7 @@ class _OauthSettingPageState extends State<OauthSettingPage> {
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
-                        OauthModel oauthModel = new OauthModel(useDefaultKey: false, oAuthKey: inputText);
+                        OauthModel oauthModel = OauthModel(useDefaultKey: false, oAuthKey: inputText.trim());
                         objectBox?.updateOAuthModel(oauthModel);
                         Future.delayed(Duration(seconds: 1), () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
@@ -93,8 +95,8 @@ class _OauthSettingPageState extends State<OauthSettingPage> {
                   SizedBox(width: 15,),
                   GestureDetector(
                     onTap: () {
-                      oAuthKeyValue = "";
-                      OauthModel oauthModel = new OauthModel(useDefaultKey: true, oAuthKey: "");
+                      oAuthKeyValue = defaultOAuthKeyValue;
+                      OauthModel oauthModel = OauthModel(useDefaultKey: true, oAuthKey: defaultOAuthKeyValue);
                       objectBox?.updateOAuthModel(oauthModel);
                       Future.delayed(Duration(seconds: 1), () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));

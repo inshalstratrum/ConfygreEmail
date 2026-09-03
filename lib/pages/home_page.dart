@@ -10,8 +10,6 @@ import '../pages/profile_page.dart';
 import '../pages/tiles_page.dart';
 import '../components/gmail_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'sender_dashboard_page.dart';
-import 'mailbox_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,17 +19,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   int _selectedIndex = 0;
   String pageTile = "Home";
 
   void navigationBottomBar(int index) async {
+
     // if(index == 3)
     //   await getProfileInfo();
 
     setState(() {
       _selectedIndex = index;
 
-      switch (index) {
+      switch(index){
         case 0:
           pageTile = "Home";
           break;
@@ -45,11 +45,24 @@ class _HomePageState extends State<HomePage> {
           pageTile = "Profile";
           break;
       }
+
     });
   }
 
+  Future<void> _runConnectionTest() async {
+    String result;
+    try {
+      final profile = await gmailApi.users.getProfile('me');
+      result = 'Connection successful\\nAccount: ${profile.emailAddress}\\nMessages: ${profile.messagesTotal ?? 0}';
+    } catch (e) {
+      result = 'Connection failed\\n$e';
+    }
+    if (!mounted) return;
+    showDialog(context: context, builder: (_) => AlertDialog(title: const Text('Gmail connection test'), content: Text(result), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))]));
+  }
+
   final List<Widget> _pages = [
-    const SenderDashboardPage(),
+    const Tiles(),
     const HistoryPage(),
     const AppSettings(),
     const ProfilePage(),
@@ -74,163 +87,136 @@ class _HomePageState extends State<HomePage> {
                 icon: Padding(
                   padding: const EdgeInsets.only(left: 12.0),
                   child: Icon(Icons.menu),
-                ))),
+                ))) ,
       ),
       drawer: Drawer(
         backgroundColor: Colors.grey[900],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => HomePage())),
-                  child: const Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: ListTile(
-                      title: Text(
-                        'Home',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ),
-                    ),
+          children: [ Column(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => HomePage())),
+                child: const Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: ListTile(
+                    title: Text('Home', style: TextStyle(color: Colors.white, fontSize: 25),),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () async {
-                    String url = "https://google.com/";
-                    try {
-                      Uri uri = Uri.parse(url);
-                      await launchUrl(
-                        uri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    } catch (ex) {
-                      print(ex);
-                    }
-                  },
-                  child: const Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: ListTile(
-                      title: Text(
-                        'FAQ',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ),
-                    ),
+              ),
+              GestureDetector(
+                onTap: () async {
+                  String url = "https://google.com/";
+                  try{
+                    Uri uri = Uri.parse(url);
+                    await launchUrl(
+                      uri, mode: LaunchMode.externalApplication,
+                    );
+                  } catch (ex) {
+                    print(ex);
+                  }
+                },
+                child: const Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: ListTile(
+                    title: Text('FAQ', style: TextStyle(color: Colors.white, fontSize: 25),),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () async {
-                    String url = "https://google.com/";
-                    try {
-                      Uri uri = Uri.parse(url);
-                      await launchUrl(
-                        uri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    } catch (ex) {
-                      print(ex);
-                    }
-                  },
-                  child: const Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: ListTile(
-                      title: Text(
-                        'Report an issue',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ),
-                    ),
+              ),
+              GestureDetector(
+                onTap: () async {
+                  String url = "https://google.com/";
+                  try{
+                    Uri uri = Uri.parse(url);
+                    await launchUrl(
+                    uri, mode: LaunchMode.externalApplication,
+                    );
+                  } catch (ex) {
+                    print(ex);
+                  }
+                },
+                child: const Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: ListTile(
+                    title: Text('Report an issue', style: TextStyle(color: Colors.white, fontSize: 25),),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () async {
-                    String url = "https://google.com/";
-                    try {
-                      Uri uri = Uri.parse(url);
-                      await launchUrl(
-                        uri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    } catch (ex) {
-                      print(ex);
-                    }
-                  },
-                  child: const Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: ListTile(
-                      title: Text(
-                        'About us',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ),
-                    ),
+              ),
+              GestureDetector(
+                onTap: () async {
+                  String url = "https://google.com/";
+                  try{
+                    Uri uri = Uri.parse(url);
+                    await launchUrl(
+                    uri, mode: LaunchMode.externalApplication,
+                    );
+                  } catch (ex) {
+                    print(ex);
+                  }
+                },
+                child: const Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: ListTile(
+                    title: Text('About us', style: TextStyle(color: Colors.white, fontSize: 25),),
                   ),
                 ),
-                // GestureDetector(
-                //   onTap: () => Navigator.push(context,
-                //       MaterialPageRoute(builder: (context) => ErrorPage())),
-                //   child: const Padding(
-                //     padding: const EdgeInsets.only(left: 25.0),
-                //     child: ListTile(
-                //       title: Text('Error Page', style: TextStyle(color: Colors.white, fontSize: 25),),
-                //     ),
-                //   ),
-                // ),
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MailboxPage())),
-                  child: const Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: ListTile(
-                      title: Text(
-                        'Test',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ),
-                    ),
+              ),
+              // GestureDetector(
+              //   onTap: () => Navigator.push(context,
+              //       MaterialPageRoute(builder: (context) => ErrorPage())),
+              //   child: const Padding(
+              //     padding: const EdgeInsets.only(left: 25.0),
+              //     child: ListTile(
+              //       title: Text('Error Page', style: TextStyle(color: Colors.white, fontSize: 25),),
+              //     ),
+              //   ),
+              // ),
+              GestureDetector(
+                onTap: _runConnectionTest,
+                child: const Padding(
+                  padding: EdgeInsets.only(left: 25.0),
+                  child: ListTile(
+                    leading: Icon(Icons.health_and_safety, color: Colors.white),
+                    title: Text('Test connection', style: TextStyle(color: Colors.white, fontSize: 25),),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    try {
-                      googleSignIn.signOut();
-                      objectBox?.removeUserCredential();
-                      gettingEmails = false;
-                      Future.delayed(Duration(seconds: 1), () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginPage()));
-                      });
-                    } catch (ex) {
-                      print(ex);
-                    }
-                  },
-                  child: const Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: ListTile(
-                      title: Text(
-                        'Log out',
-                        style: TextStyle(color: Colors.redAccent, fontSize: 25),
-                      ),
-                    ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  try{
+                    googleSignIn.signOut();
+                    objectBox?.removeUserCredential();
+                    gettingEmails = false;
+                    Future.delayed(Duration(seconds: 1), () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                    });
+                  } catch (ex) {
+                    print(ex);
+                  }
+                },
+                child: const Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: ListTile(
+                    title: Text('Log out', style: TextStyle(color: Colors.redAccent, fontSize: 25),),
                   ),
                 ),
-                // GestureDetector(
-                //   onTap: () {
-                //     // DateTime testTime = DateTime.now().toUtc().add(Duration(days: 60));
-                //     // insertMembershipData("test@test.com", "Free", testTime);
-                //     checkIfEmailExists("test1@test.com");
-                //   },
-                //   child: const Padding(
-                //     padding: const EdgeInsets.only(left: 25.0),
-                //     child: ListTile(
-                //       title: Text('test', style: TextStyle(color: Colors.redAccent, fontSize: 25),),
-                //     ),
-                //   ),
-                // )
-              ],
-            )
+              ),
+              // GestureDetector(
+              //   onTap: () {
+              //     // DateTime testTime = DateTime.now().toUtc().add(Duration(days: 60));
+              //     // insertMembershipData("test@test.com", "Free", testTime);
+              //     checkIfEmailExists("test1@test.com");
+              //   },
+              //   child: const Padding(
+              //     padding: const EdgeInsets.only(left: 25.0),
+              //     child: ListTile(
+              //       title: Text('test', style: TextStyle(color: Colors.redAccent, fontSize: 25),),
+              //     ),
+              //   ),
+              // )
+            ],
+          )
           ],
         ),
       ),
