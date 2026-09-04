@@ -1,14 +1,9 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import '../pages/history_page.dart';
-import '../pages/home_page.dart';
 
 import '../components/GlobalVariables.dart';
-import '../components/objectBox.dart';
 import '../components/emails.dart';
+import '../components/objectBox.dart';
 import '../models/app_settings_model.dart';
-import '../objectbox.g.dart';
 
 class AppSettings extends StatefulWidget {
   const AppSettings({super.key});
@@ -18,157 +13,84 @@ class AppSettings extends StatefulWidget {
 }
 
 class _AppSettingsState extends State<AppSettings> {
-
-  AppSettingsModel _appSettingsModel = AppSettingsModel(
-      //unsubscribeAndMoveToTrash: unsubscribeAndMoveToTrash,
-      permanentDelete: permanentDelete,
-      blockTheSender: blockTheSender,
-      deleteAllMailsFromTheSender: deleteAllMailsFromTheSender,
-      showSkippedEmails: showSkippedEmails,
-      showOnlyUnsubscribableEmails: showOnlyUnsubscribableEmails
-  );
+  late AppSettingsModel _model;
 
   @override
   void initState() {
     super.initState();
-
-    AppSettingsModel? data = objectBox?.getAppSettings();
-
-    if(data != null){
-      //unsubscribeAndMoveToTrash = data.unsubscribeAndMoveToTrash;
-      permanentDelete = data.permanentDelete;
-      blockTheSender = data.blockTheSender;
-      deleteAllMailsFromTheSender = data.deleteAllMailsFromTheSender;
-      showSkippedEmails = data.showSkippedEmails;
-      showOnlyUnsubscribableEmails = data.showOnlyUnsubscribableEmails;
+    final saved = objectBox?.getAppSettings();
+    if (saved != null) {
+      permanentDelete = saved.permanentDelete;
+      blockTheSender = saved.blockTheSender;
+      deleteAllMailsFromTheSender = saved.deleteAllMailsFromTheSender;
+      showSkippedEmails = saved.showSkippedEmails;
+      showOnlyUnsubscribableEmails = saved.showOnlyUnsubscribableEmails;
     }
+    _model = AppSettingsModel(
+      permanentDelete: permanentDelete,
+      blockTheSender: blockTheSender,
+      deleteAllMailsFromTheSender: deleteAllMailsFromTheSender,
+      showSkippedEmails: showSkippedEmails,
+      showOnlyUnsubscribableEmails: showOnlyUnsubscribableEmails,
+    );
   }
 
-  void updateToLocalDB(){
-    //_appSettingsModel.unsubscribeAndMoveToTrash = unsubscribeAndMoveToTrash;
-    _appSettingsModel.permanentDelete = permanentDelete;
-    _appSettingsModel.blockTheSender = blockTheSender;
-    _appSettingsModel.deleteAllMailsFromTheSender = deleteAllMailsFromTheSender;
-    _appSettingsModel.showSkippedEmails = showSkippedEmails;
-    _appSettingsModel.showOnlyUnsubscribableEmails = showOnlyUnsubscribableEmails;
-    objectBox?.updateAppSettings(_appSettingsModel);
+  void _save() {
+    _model
+      ..permanentDelete = permanentDelete
+      ..blockTheSender = blockTheSender
+      ..deleteAllMailsFromTheSender = deleteAllMailsFromTheSender
+      ..showSkippedEmails = showSkippedEmails
+      ..showOnlyUnsubscribableEmails = showOnlyUnsubscribableEmails;
+    objectBox?.updateAppSettings(_model);
   }
+
+  Widget _toggle({required String title, required String subtitle, required bool value, required ValueChanged<bool> onChanged}) =>
+      Card(
+        child: SwitchListTile.adaptive(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(subtitle),
+          value: value,
+          onChanged: (next) { setState(() => onChanged(next)); _save(); },
+        ),
+      );
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Padding(
-        padding: const EdgeInsets.only(top: 10.0, left: 25, right: 25),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SwitchListTile(
-              title: const Text('Permanent delete'),
-              subtitle: const Text('Delete instead of moving messages to Trash'),
-              activeColor: Colors.blueAccent,
-              value: permanentDelete,
-              onChanged: (bool value) {
-                setState(() { permanentDelete = value; updateToLocalDB(); });
-              },
+  Widget build(BuildContext context) => ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+        children: [
+          Text('Mailbox behavior', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text('Choose how cleanup actions should work. You can change these at any time.', style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 14),
+          _toggle(title: 'Permanent delete', subtitle: 'Delete immediately instead of moving mail to Trash.', value: permanentDelete, onChanged: (v) => permanentDelete = v),
+          const SizedBox(height: 8),
+          _toggle(title: 'Block the sender', subtitle: 'Keep the existing sender-blocking preference enabled for cleanup.', value: blockTheSender, onChanged: (v) => blockTheSender = v),
+          const SizedBox(height: 8),
+          _toggle(title: 'Delete all mail from sender', subtitle: 'Apply sender cleanup to every matching message.', value: deleteAllMailsFromTheSender, onChanged: (v) => deleteAllMailsFromTheSender = v),
+          const SizedBox(height: 24),
+          Text('Review preferences', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 14),
+          _toggle(title: 'Show skipped senders', subtitle: 'Include senders you previously skipped in the cleanup queue.', value: showSkippedEmails, onChanged: (v) => showSkippedEmails = v),
+          const SizedBox(height: 8),
+          _toggle(title: 'Only show unsubscribable senders', subtitle: 'Focus the cleanup queue on messages with unsubscribe metadata.', value: showOnlyUnsubscribableEmails, onChanged: (v) => showOnlyUnsubscribableEmails = v),
+          const SizedBox(height: 24),
+          Card(
+            color: Theme.of(context).colorScheme.errorContainer,
+            child: ListTile(
+              leading: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.onErrorContainer),
+              title: Text('Empty Gmail Trash', style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer, fontWeight: FontWeight.w700)),
+              subtitle: Text('Permanently delete every message currently in Trash.', style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
+              onTap: _emptyTrash,
             ),
-            // First toggle switch
-            // SwitchListTile(
-            //   title: Text(
-            //     'Unsubscribe and move to trash',
-            //   ),
-            //   activeColor: Colors.blueAccent,
-            //   inactiveThumbColor: Colors.black,
-            //   value: unsubscribeAndMoveToTrash,
-            //   onChanged: (bool value) {
-            //     setState(() {
-            //       unsubscribeAndMoveToTrash = value;
-            //       updateToLocalDB();
-            //     });
-            //   },
-            // ),
-            // Second toggle switch
-            // SwitchListTile(
-            //   title: Text('Permanent delete'),
-            //   activeColor: Colors.blueAccent,
-            //   inactiveThumbColor: Colors.black,
-            //   value: permanentDelete,
-            //   onChanged: (bool value) {
-            //     setState(() {
-            //       permanentDelete = value;
-            //       updateToLocalDB();
-            //     });
-            //   },
-            // ),
-            // Third toggle switch
-            SwitchListTile(
-              title: Text('Block the sender'),
-              activeColor: Colors.blueAccent,
-              inactiveThumbColor: Colors.black,
-              value: blockTheSender,
-              onChanged: (bool value) {
-                setState(() {
-                  blockTheSender = value;
-                  updateToLocalDB();
-                });
-              },
-            ),
-            //Fourth toggle switch
-            SwitchListTile(
-              title: Text('Delete all mails from the sender'),
-              activeColor: Colors.blueAccent,
-              inactiveThumbColor: Colors.black,
-              value: deleteAllMailsFromTheSender,
-              onChanged: (bool value) {
-                setState(() {
-                  deleteAllMailsFromTheSender = value;
-                  updateToLocalDB();
-                });
-              },
-            ),
-            //Fifth toggle switch
-            SwitchListTile(
-              title: Text('Show skipped emails'),
-              activeColor: Colors.blueAccent,
-              inactiveThumbColor: Colors.black,
-              value: showSkippedEmails,
-              onChanged: (bool value) {
-                setState(() {
-                  showSkippedEmails = value;
-                  updateToLocalDB();
-                });
-              },
-            ),
-            //Sixth toggle switch
-            SwitchListTile(
-              title: Text('Show only unsubscribable emails'),
-              activeColor: Colors.blueAccent,
-              inactiveThumbColor: Colors.black,
-              value: showOnlyUnsubscribableEmails,
-              onChanged: (bool value) {
-                setState(() {
-                  showOnlyUnsubscribableEmails = value;
-                  updateToLocalDB();
-                });
-              },
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.delete_sweep),
-                label: const Text('Clear all messages from Trash'),
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(context: context, builder: (_) => AlertDialog(title: const Text('Empty Trash?'), content: const Text('This permanently deletes every message currently in Gmail Trash.'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Empty Trash'))]));
-                  if (confirmed == true) {
-                    try { await emptyTrash(); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trash emptied'))); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not empty Trash: $e'))); }
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ],
+      );
+
+  Future<void> _emptyTrash() async {
+    final confirmed = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: const Text('Empty Trash permanently?'), content: const Text('This action cannot be undone.'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Empty Trash'))]));
+    if (confirmed != true) return;
+    try { await emptyTrash(); if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trash emptied.'))); } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not empty Trash: $e'))); }
   }
 }

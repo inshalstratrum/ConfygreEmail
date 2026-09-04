@@ -8,6 +8,7 @@ import '../pages/history_page.dart';
 import '../pages/login_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/tiles_page.dart';
+import '../pages/mailbox_page.dart';
 import '../components/gmail_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -104,6 +105,11 @@ class _HomePageState extends State<HomePage> {
                     title: Text('Home', style: TextStyle(color: Colors.white, fontSize: 25),),
                   ),
                 ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.mail_outline, color: Colors.white),
+                title: const Text('Mailbox', style: TextStyle(color: Colors.white, fontSize: 18)),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MailboxPage())),
               ),
               GestureDetector(
                 onTap: () async {

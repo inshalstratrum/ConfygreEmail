@@ -425,3 +425,25 @@ Future<void> callWebPage(String url) async {
     print('Error occurred while calling web page: $e');
   }
 }
+
+
+/// Fetches one Gmail page and only expands messages in that page. The caller owns
+/// the cursor so screens can lazy-load more results without re-fetching page one.
+Future<({List<gMail.Message> messages, String? nextPageToken})> listMailboxPage({
+  String query = '',
+  String? pageToken,
+  int maxResults = 30,
+}) async {
+  final response = await gmailApi.users.messages.list(
+    'me',
+    q: query.isEmpty ? null : query,
+    pageToken: pageToken,
+    maxResults: maxResults,
+  );
+  final details = <gMail.Message>[];
+  for (final summary in response.messages ?? <gMail.Message>[]) {
+    if (summary.id == null) continue;
+    details.add(await gmailApi.users.messages.get('me', summary.id!, format: 'full'));
+  }
+  return (messages: details, nextPageToken: response.nextPageToken);
+}
