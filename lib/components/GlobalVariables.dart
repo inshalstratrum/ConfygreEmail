@@ -64,7 +64,10 @@ String? membershipType;
 ObjectBox? objectBox;
 
 String? oAuthKeyValue;
-String defaultOAuthKeyValue = "";
+// Public OAuth client identifier for this Android app. It is safe to ship in
+// the APK; never ship a client secret or private key.
+const String defaultOAuthKeyValue =
+    '830827000721-u78481qregjslsc22fafk9621fvdg1n6.apps.googleusercontent.com';
 
 String getDateTimeInUTC() {
   DateTime nowUtc = DateTime.now().toUtc();

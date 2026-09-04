@@ -48,7 +48,10 @@ Future<bool> authGoogle() async {
 GoogleSignIn signInGoole() {
   // const webClientId = '446415986013-4mg1uh7kptaodrt17rmv9mak0fv2n5hf.apps.googleusercontent.com'; //OG
   OauthModel? oauthModel = objectBox?.getOAuthData();
-  String webClientId = oauthModel?.oAuthKey ?? defaultOAuthKeyValue; //confygre
+  final savedOverride =
+      oauthModel?.useDefaultKey == false ? oauthModel?.oAuthKey.trim() : null;
+  final webClientId =
+      savedOverride?.isNotEmpty == true ? savedOverride! : defaultOAuthKeyValue;
 
   /// TODO: update the iOS client ID with your own.
   ///
