@@ -5,6 +5,12 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.confygre.email"
     compileSdk = flutter.compileSdkVersion
@@ -12,16 +18,16 @@ android {
 
     signingConfigs {
         debug {
-            keyAlias = "confygreEmail"
-            keyPassword = "Basidh728"
-            storeFile = file("../keystore.jks")
-            storePassword = "Basidh728"
+            keyAlias = keystoreProperties['keyAlias'] ?: 'confygreEmail'
+            keyPassword = keystoreProperties['keyPassword'] ?: ''
+            storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file('../keystore.jks')
+            storePassword = keystoreProperties['storePassword'] ?: ''
         }
         release {
-            keyAlias = "confygreEmail"
-            keyPassword = "Basidh728"
-            storeFile = file("../keystore.jks")
-            storePassword = "Basidh728"
+            keyAlias = keystoreProperties['keyAlias'] ?: 'confygreEmail'
+            keyPassword = keystoreProperties['keyPassword'] ?: ''
+            storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file('../keystore.jks')
+            storePassword = keystoreProperties['storePassword'] ?: ''
         }
     }
 
