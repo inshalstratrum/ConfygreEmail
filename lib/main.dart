@@ -41,22 +41,31 @@ class MyApp extends StatelessWidget {
           elevation: 0,
           backgroundColor: scheme.surface,
           foregroundColor: scheme.onSurface,
-          titleTextStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+          titleTextStyle:
+              const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 0,
           margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: scheme.surfaceContainerHighest.withOpacity(.55),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: scheme.primary, width: 2)),
+          fillColor: scheme.surfaceContainerHighest.withValues(alpha: .55),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: scheme.primary, width: 2)),
         ),
         chipTheme: ChipThemeData(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           side: BorderSide.none,
         ),
         listTileTheme: const ListTileThemeData(minVerticalPadding: 8),

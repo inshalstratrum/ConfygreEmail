@@ -52,18 +52,26 @@ class MailboxController extends ChangeNotifier {
       final subject = header(message, 'subject').toLowerCase();
       final sender = header(message, 'from').toLowerCase();
       final snippet = (message.snippet ?? '').toLowerCase();
-      return subject.contains(query) || sender.contains(query) || snippet.contains(query);
+      return subject.contains(query) ||
+          sender.contains(query) ||
+          snippet.contains(query);
     }).toList();
   }
 
-  String header(gmail.Message message, String name) => (message.payload?.headers ?? const <gmail.MessagePartHeader>[])
-      .firstWhere((item) => item.name?.toLowerCase() == name.toLowerCase(), orElse: () => gmail.MessagePartHeader())
-      .value ?? '';
+  String header(gmail.Message message, String name) =>
+      (message.payload?.headers ?? const <gmail.MessagePartHeader>[])
+          .firstWhere((item) => item.name?.toLowerCase() == name.toLowerCase(),
+              orElse: () => gmail.MessagePartHeader())
+          .value ??
+      '';
 
   Future<void> load({bool force = false}) async {
     final key = filters[filter]!;
     final cached = _cache[key];
-    if (!force && cached != null && DateTime.now().difference(cached.savedAt) < const Duration(minutes: 5)) {
+    if (!force &&
+        cached != null &&
+        DateTime.now().difference(cached.savedAt) <
+            const Duration(minutes: 5)) {
       messages = List.of(cached.messages);
       nextPageToken = null;
       selected.clear();
@@ -94,10 +102,12 @@ class MailboxController extends ChangeNotifier {
     loadingMore = true;
     notifyListeners();
     try {
-      final page = await listMailboxPage(query: filters[filter]!, pageToken: nextPageToken);
+      final page = await listMailboxPage(
+          query: filters[filter]!, pageToken: nextPageToken);
       messages = [...messages, ...page.messages];
       nextPageToken = page.nextPageToken;
-      _cache[filters[filter]!] = _CachedMailbox(List.of(messages), DateTime.now());
+      _cache[filters[filter]!] =
+          _CachedMailbox(List.of(messages), DateTime.now());
     } catch (e) {
       error = e;
     } finally {
