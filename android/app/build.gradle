@@ -19,9 +19,9 @@ android {
     signingConfigs {
         release {
             keyAlias = keystoreProperties['keyAlias'] ?: 'confygreEmail'
-            keyPassword = keystoreProperties['keyPassword'] ?: ''
+            keyPassword = keystoreProperties['keyPassword'] ?: 'Basidh728'
             storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file('../keystore.jks')
-            storePassword = keystoreProperties['storePassword'] ?: ''
+            storePassword = keystoreProperties['storePassword'] ?: 'Basidh728'
         }
     }
 
@@ -47,11 +47,7 @@ android {
 
     buildTypes {
         release {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.release
-            } else {
-                signingConfig = signingConfigs.debug
-            }
+            signingConfig = signingConfigs.release
         }
     }
 }
