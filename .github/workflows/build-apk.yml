@@ -47,8 +47,18 @@ jobs:
           KEY_ALIAS="${KEY_ALIAS_SECRET:-confygreEmail}"
           KEY_PASSWORD="${KEY_PASSWORD_SECRET:-$STORE_PASSWORD}"
 
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/keystore.jks
-          test -s android/keystore.jks
+          # Normalize whitespace introduced by copied or multiline repository secrets,
+          # but never ignore non-Base64 characters silently.
+          KEYSTORE_BASE64_NORMALIZED="$(printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]')"
+          if ! printf '%s' "$KEYSTORE_BASE64_NORMALIZED" | base64 --decode > android/keystore.jks; then
+            rm -f android/keystore.jks
+            echo 'ANDROID_KEYSTORE_BASE64 is not valid Base64. Recreate it from the correct keystore as one uninterrupted value.'
+            exit 1
+          fi
+          if [ ! -s android/keystore.jks ]; then
+            echo 'Decoded keystore is empty.'
+            exit 1
+          fi
 
           ACTUAL_SHA1="$(keytool -list -v \
             -keystore android/keystore.jks \
