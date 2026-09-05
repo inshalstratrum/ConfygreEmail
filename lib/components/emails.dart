@@ -65,26 +65,50 @@ Future<void> getEmails() async {
     // Fetch messages
     do {
       String query = "";
+      List<String> queryParts = [];
+
+      // Category / folder filter
+      if (selectedMailFilter == 'Promotions') {
+        queryParts.add('category:promotions');
+      } else if (selectedMailFilter == 'Updates') {
+        queryParts.add('category:updates');
+      } else if (selectedMailFilter == 'Social') {
+        queryParts.add('category:social');
+      } else if (selectedMailFilter == 'Important') {
+        queryParts.add('is:important');
+      } else if (selectedMailFilter == 'Purchases') {
+        queryParts.add('category:purchases');
+      } else if (selectedMailFilter == 'Sent') {
+        queryParts.add('in:sent');
+      } else if (selectedMailFilter == 'Drafts') {
+        queryParts.add('in:draft');
+      } else if (selectedMailFilter == 'Trash') {
+        queryParts.add('in:trash');
+      } else if (selectedMailFilter == 'Spam') {
+        queryParts.add('in:spam');
+      } else if (selectedMailFilter == 'Starred') {
+        queryParts.add('is:starred');
+      } else if (selectedMailFilter == '1-Click Only') {
+        queryParts.add('unsubscribe in:inbox');
+      } else {
+        queryParts.add('in:inbox');
+      }
+
       if (!showSkippedEmails) {
         if (excludedEmails.length > 0) excludedEmails.clear();
         if (skippedEmails != null) {
           excludedEmails.addAll(skippedEmails!.map((e) => e.email).toList());
-          query = buildExclusionQuery(excludedEmails);
+          String exclusion = buildExclusionQuery(excludedEmails);
+          if (exclusion.isNotEmpty) {
+            queryParts.add(exclusion);
+          }
         }
       }
 
-      gMail.ListMessagesResponse results;
+      query = queryParts.join(' ');
 
-      if (query.length == 0) {
-        results = await gmailApi.users.messages.list(
-          "me",
-          pageToken: nextPageToken,
-          maxResults: 25,
-        );
-      } else {
-        results = await gmailApi.users.messages
-            .list("me", pageToken: nextPageToken, q: query, maxResults: 25);
-      }
+      gMail.ListMessagesResponse results = await gmailApi.users.messages
+          .list("me", pageToken: nextPageToken, q: query.isEmpty ? null : query, maxResults: 25);
 
       //Check if results.messages is not null before iterating
       if (results.messages != null) {
@@ -135,7 +159,7 @@ Future<void> getEmails() async {
           print(
               "${emailDataList.containsKey(emailStringModel?.email)} (${emailData.isOneClickUnsub} || ${showOnlyUnsubscribableEmails})");
           if (!emailDataList.containsKey(emailStringModel?.email) &&
-              (emailData.isOneClickUnsub || !showOnlyUnsubscribableEmails)) {
+              (emailData.isOneClickUnsub || (!showOnlyUnsubscribableEmails && selectedMailFilter != '1-Click Only'))) {
             print("in");
             // Extract labels and flags
             emailData.isStared = false;

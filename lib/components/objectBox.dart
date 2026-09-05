@@ -174,29 +174,28 @@ class ObjectBox {
   }
 
   Future<bool> removeSkippedEmail(String email) async {
-    try{
-      List<String> emailList = await getBulkEmailList(email);
-      if (emailList.isEmpty)
-        return false; // Return early if the list is empty
-
+    try {
       final query1 = _skippedEmailListBox.query(SkippedEmailsHistoryModel_.email.equals(email)).build();
       final SkippedEmailsHistoryModel? result1 = query1.findFirst();
       query1.close();
-      if(result1 != null) {
+      if (result1 != null) {
         _skippedEmailListBox.remove(result1.id);
-        skippedEmails?.removeWhere((item) => item.email == email);
+      }
+      skippedEmails?.removeWhere((item) => item.email == email);
+
+      List<String> emailList = await getBulkEmailList(email);
+      if (emailList.isNotEmpty) {
+        for (final emailId in emailList) {
+          final query2 = _checkedEmails.query(CheckedEmailsModel_.emailIds.equals(emailId)).build();
+          final CheckedEmailsModel? result2 = query2.findFirst();
+          query2.close();
+          if (result2 != null) {
+            _checkedEmails.remove(result2.id);
+          }
+        }
       }
 
-      emailList.forEach((emailId) {
-        final query2 = _checkedEmails.query(CheckedEmailsModel_.emailIds.equals(emailId)).build();
-        final CheckedEmailsModel? result2 = query2.findFirst();
-        query2.close();
-        if(result2 != null)
-          _checkedEmails.remove(result2.id);
-      });
-
       return true;
-
     } catch (e) {
       return false;
     }
