@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../components/GlobalVariables.dart';
 import '../components/bottom_nav_bar.dart';
@@ -190,12 +192,14 @@ class _HomePageState extends State<HomePage> {
               ),
               GestureDetector(
                 onTap: () {
-                  try{
-                    googleSignIn.signOut();
+                  try {
+                    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+                      googleSignIn.signOut();
+                    }
                     objectBox?.removeUserCredential();
                     gettingEmails = false;
-                    Future.delayed(Duration(seconds: 1), () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                    Future.delayed(const Duration(seconds: 1), () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                     });
                   } catch (ex) {
                     print(ex);

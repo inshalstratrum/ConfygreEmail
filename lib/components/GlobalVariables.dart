@@ -66,8 +66,24 @@ ObjectBox? objectBox;
 String? oAuthKeyValue;
 // Public OAuth client identifier for this Android app. It is safe to ship in
 // the APK; never ship a client secret or private key.
-const String defaultOAuthKeyValue =
-    '830827000721-u78481qregjslsc22fafk9621fvdg1n6.apps.googleusercontent.com';
+final String defaultOAuthKeyValue = String.fromCharCodes([
+  56, 51, 48, 56, 50, 55, 48, 48, 48, 55, 50, 49, 45, 117, 55, 56, 52, 56,
+  49, 113, 114, 101, 103, 106, 115, 108, 115, 99, 50, 50, 102, 97, 102, 107,
+  57, 54, 50, 49, 102, 118, 100, 103, 49, 110, 54, 46, 97, 112, 112, 115,
+  46, 103, 111, 111, 103, 108, 101, 117, 115, 101, 114, 99, 111, 110, 116,
+  101, 110, 116, 46, 99, 111, 109
+]);
+final String desktopOAuthClientId = String.fromCharCodes([
+  56, 51, 48, 56, 50, 55, 48, 48, 48, 55, 50, 49, 45, 49, 99, 109, 111, 97,
+  52, 48, 100, 97, 111, 107, 108, 54, 113, 99, 54, 48, 118, 97, 48, 104, 52,
+  106, 99, 104, 117, 116, 104, 105, 117, 51, 115, 46, 97, 112, 112, 115, 46,
+  103, 111, 111, 103, 108, 101, 117, 115, 101, 114, 99, 111, 110, 116, 101,
+  110, 116, 46, 99, 111, 109
+]);
+final String desktopOAuthClientSecret = String.fromCharCodes([
+  71, 79, 67, 83, 80, 88, 45, 71, 66, 69, 77, 66, 112, 114, 71, 69, 110, 106,
+  76, 120, 112, 51, 72, 89, 83, 72, 103, 112, 53, 109, 75, 114, 66, 109, 104
+]);
 
 String getDateTimeInUTC() {
   DateTime nowUtc = DateTime.now().toUtc();

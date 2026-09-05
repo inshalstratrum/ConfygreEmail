@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/tiles_data_model.dart';
 import '../models/email_data_model.dart';
@@ -161,7 +163,9 @@ class _TilesState extends State<Tiles> {
           }
         } catch (e) {
           try {
-            googleSignIn.signOut();
+            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+              googleSignIn.signOut();
+            }
             objectBox?.removeUserCredential();
             gettingEmails = false;
             if (mounted) {
