@@ -17,12 +17,6 @@ android {
     ndkVersion = flutter.ndkVersion
 
     signingConfigs {
-        debug {
-            keyAlias = keystoreProperties['keyAlias'] ?: 'confygreEmail'
-            keyPassword = keystoreProperties['keyPassword'] ?: ''
-            storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file('../keystore.jks')
-            storePassword = keystoreProperties['storePassword'] ?: ''
-        }
         release {
             keyAlias = keystoreProperties['keyAlias'] ?: 'confygreEmail'
             keyPassword = keystoreProperties['keyPassword'] ?: ''
