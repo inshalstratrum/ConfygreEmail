@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Signed Release APK
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -32,22 +32,6 @@ jobs:
 
       - name: Install Dependencies
         run: flutter pub get
-
-      - name: Configure Keystore & Signing
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-        run: |
-          mkdir -p android
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > android/keystore.jks
-            cat <<EOF > android/key.properties
-          keyAlias=confygreEmail
-          keyPassword=${KEYSTORE_PASSWORD}
-          storeFile=../keystore.jks
-          storePassword=${KEYSTORE_PASSWORD}
-          EOF
-          fi
 
       - name: Build Release APK
         run: flutter build apk --release
