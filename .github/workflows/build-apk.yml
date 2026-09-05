@@ -13,41 +13,71 @@ jobs:
   build:
     name: Build Signed Release APK
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           cache: true
 
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Configure Keystore & Signing
+      - name: Configure and Verify Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS_SECRET: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD_SECRET: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          mkdir -p android
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > android/keystore.jks
-            cat <<EOF > android/key.properties
-          keyAlias=confygreEmail
-          keyPassword=${KEYSTORE_PASSWORD}
-          storeFile=../keystore.jks
-          storePassword=${KEYSTORE_PASSWORD}
-          EOF
+          set -euo pipefail
+
+          : "${KEYSTORE_BASE64:?Missing ANDROID_KEYSTORE_BASE64 repository secret}"
+          : "${STORE_PASSWORD:?Missing ANDROID_KEYSTORE_PASSWORD repository secret}"
+
+          KEY_ALIAS="${KEY_ALIAS_SECRET:-confygreEmail}"
+          KEY_PASSWORD="${KEY_PASSWORD_SECRET:-$STORE_PASSWORD}"
+
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/keystore.jks
+          test -s android/keystore.jks
+
+          ACTUAL_SHA1="$(keytool -list -v \
+            -keystore android/keystore.jks \
+            -storepass "$STORE_PASSWORD" \
+            -alias "$KEY_ALIAS" 2>/dev/null \
+            | awk -F': ' '/SHA1:/{print $2; exit}')"
+
+          if [ -z "$ACTUAL_SHA1" ]; then
+            echo 'Unable to read the keystore. Check the keystore password and alias secrets.'
+            exit 1
           fi
+
+          EXPECTED_SHA1='A8:91:81:5E:35:D6:1D:F8:CA:67:41:2B:71:89:FA:4F:E6:FA:B4:0F'
+          ACTUAL_NORMALIZED="$(printf '%s' "$ACTUAL_SHA1" | tr '[:lower:]' '[:upper:]')"
+          EXPECTED_NORMALIZED="$(printf '%s' "$EXPECTED_SHA1" | tr '[:lower:]' '[:upper:]')"
+
+          echo "Keystore SHA-1: $ACTUAL_SHA1"
+          if [ "$ACTUAL_NORMALIZED" != "$EXPECTED_NORMALIZED" ]; then
+            echo "Keystore SHA-1 does not match the registered release certificate."
+            echo "Expected: $EXPECTED_SHA1"
+            exit 1
+          fi
+
+          cat > android/key.properties <<EOF
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          storeFile=../keystore.jks
+          storePassword=$STORE_PASSWORD
+          EOF
 
       - name: Build Release APK
         run: flutter build apk --release
@@ -57,7 +87,7 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Confygre Email Release v1.0.${{ github.run_number }}
-          body: "Release build with performance improvements, persistent login, quota batching, and modern UI."
+          body: Release build with performance optimizations and modern UI.
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
