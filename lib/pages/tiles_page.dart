@@ -160,7 +160,6 @@ class _TilesState extends State<Tiles> {
   Future<void> showEmailDataOrWait() async {
     if (emailDataList.isNotEmpty) {
       // Update the UI once emailDataList is populated
-
       int emailCount = await getEmailCount(emailDataList.entries.first.value.senderEmail!);
 
       setState(() {
@@ -170,7 +169,6 @@ class _TilesState extends State<Tiles> {
         emailSenderEmail = emailDataList.entries.first.value.senderEmail!;
         isEmailStared = emailDataList.entries.first.value.isStared;
         isEmailImportant = emailDataList.entries.first.value.isImportant;
-        // numberOfEmailsAvailable = emailDataList.entries.first.value.count;
         numberOfEmailsAvailable = emailCount;
         isOneClickUnsub = emailDataList.entries.first.value.isOneClickUnsub;
         mailToString = emailDataList.entries.first.value.mailToString ?? "";
@@ -178,31 +176,36 @@ class _TilesState extends State<Tiles> {
         directString = emailDataList.entries.first.value.directString ?? "";
       });
     } else {
-      // Recheck after a delay
-      setState(() {
-        emailSubject = "...";
-        emailSenderName = "loading...";
-        emailSenderEmail = "";
-        numberOfEmailsAvailable = 0;
-      });
+      // Only start loading if not already in progress
       if (!gettingEmails) {
         gettingEmails = true;
-        try{
-          getEmails();
-        } catch(e) {
-          try{
+        try {
+          await getEmails();
+          // After loading, update UI
+          if (emailDataList.isNotEmpty && mounted) {
+            showEmailDataOrWait();
+          }
+        } catch (e) {
+          try {
             googleSignIn.signOut();
             objectBox?.removeUserCredential();
             gettingEmails = false;
-            Future.delayed(Duration(seconds: 1), () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
-            });
+            if (mounted) {
+              Future.delayed(Duration(seconds: 1), () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+              });
+            }
           } catch (ex) {
             print(ex);
           }
+        } finally {
+          if (mounted) {
+            setState(() {
+              gettingEmails = false;
+            });
+          }
         }
       }
-      Future.delayed(Duration(milliseconds: 1000), showEmailDataOrWait);
     }
   }
 
@@ -296,21 +299,40 @@ class _TilesState extends State<Tiles> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: const Color(0xFFF6F8FB),
       body: Column(
         children: [
           //Today Count
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('View: ', style: TextStyle(fontWeight: FontWeight.bold)),
-              DropdownButton<String>(
-                value: selectedMailFilter,
-                items: const ['Inbox', 'Promotions', 'Updates', 'Personal', 'Social', 'Important', 'Purchases', 'Sent', 'Drafts', 'Trash', 'Spam'].map((filter) => DropdownMenuItem(value: filter, child: Text(filter))).toList(),
-                onChanged: (value) {
-                  if (value == null || value == selectedMailFilter) return;
-                  setState(() { selectedMailFilter = value; emailDataList.clear(); gettingEmails = false; });
-                  showEmailDataOrWait();
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('View: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    DropdownButton<String>(
+                      value: selectedMailFilter,
+                      items: const ['Inbox', 'Promotions', 'Updates', 'Personal', 'Social', 'Important', 'Purchases', 'Sent', 'Drafts', 'Trash', 'Spam'].map((filter) => DropdownMenuItem(value: filter, child: Text(filter))).toList(),
+                      onChanged: (value) {
+                        if (value == null || value == selectedMailFilter) return;
+                        setState(() { selectedMailFilter = value; emailDataList.clear(); gettingEmails = false; });
+                        showEmailDataOrWait();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.refresh, color: Colors.grey[800]),
+                onPressed: () {
+                  if (!gettingEmails) {
+                    setState(() {
+                      emailDataList.clear();
+                      gettingEmails = false;
+                    });
+                    showEmailDataOrWait();
+                  }
                 },
               ),
             ],
@@ -327,7 +349,11 @@ class _TilesState extends State<Tiles> {
                         horizontal: 5), // Add margin for spacing
                     padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      gradient: LinearGradient(
+                        colors: [Colors.grey[800]!, Colors.grey[900]!],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -335,14 +361,14 @@ class _TilesState extends State<Tiles> {
                       children: [
                         Text(
                           'Unsubscribed',
-                          style: TextStyle(fontSize: 10, color: Colors.black),
+                          style: TextStyle(fontSize: 10, color: Colors.white),
                         ),
                         Text(
                           unsubscribedToday.toString(),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -355,7 +381,11 @@ class _TilesState extends State<Tiles> {
                         horizontal: 5), // Add margin for spacing
                     padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      gradient: LinearGradient(
+                        colors: [Colors.blueGrey[800]!, Colors.blueGrey[900]!],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -363,14 +393,14 @@ class _TilesState extends State<Tiles> {
                       children: [
                         Text(
                           'Deleted',
-                          style: TextStyle(fontSize: 10, color: Colors.black),
+                          style: TextStyle(fontSize: 10, color: Colors.white),
                         ),
                         Text(
                           deletedToday.toString(),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -414,7 +444,11 @@ class _TilesState extends State<Tiles> {
               padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black87,
+                  gradient: LinearGradient(
+                    colors: [Colors.grey[800]!, Colors.blueGrey[900]!],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Padding(
@@ -506,9 +540,27 @@ class _TilesState extends State<Tiles> {
                                     borderRadius: BorderRadius.circular(12), // Optional rounded corners
                                   ),
                                   alignment: Alignment.center, // Center the text inside the container
-                                  child: Text(
-                                    'Unsub + Delete',
-                                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold), // Styling for the text
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (isOneClickUnsub)
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            '1-Click',
+                                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Unsub + Delete',
+                                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               )

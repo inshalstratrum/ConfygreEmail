@@ -20,7 +20,8 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final signedIn = await authGoogle();
       if (!signedIn) return;
-      await getEmails();
+      // Don't call getEmails() here - causes redundant loading
+      // Emails will load when HomePage/TilesPage displays
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -39,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F8FB),
       body: SafeArea(
         child: Center(
           child: Padding(

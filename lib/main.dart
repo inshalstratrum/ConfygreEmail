@@ -1,4 +1,5 @@
 import 'package:Confygre_Email/models/oauth_model.dart';
+import 'package:Confygre_Email/models/user_credential_model.dart';
 import 'package:Confygre_Email/pages/oAuth_setting_page.dart';
 import 'package:flutter/material.dart';
 
@@ -6,6 +7,7 @@ import 'components/objectBox.dart';
 import 'objectbox.g.dart';
 import 'pages/intro_screen_page.dart';
 import 'pages/login_page.dart';
+import 'pages/home_page.dart';
 import 'components/GlobalVariables.dart';
 
 Future<void> main() async {
@@ -22,7 +24,15 @@ class MyApp extends StatelessWidget {
     bool toHome = true;
     Widget widget = OauthSettingPage();
     final OauthModel? oauthModel = objectBox?.getOAuthData();
-    if (oauthModel != null) widget = LoginPage();
+    final UserCredentialModel? userCredential = objectBox?.getUserCredential();
+    
+    // Check if we have valid OAuth config and user credentials for auto-login
+    if (oauthModel != null && userCredential != null) {
+      // Auto-login: route directly to HomePage
+      widget = HomePage();
+    } else if (oauthModel != null) {
+      widget = LoginPage();
+    }
     if (!toHome) widget = IntroScreenPage();
 
     final scheme = ColorScheme.fromSeed(
@@ -35,7 +45,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: scheme,
-        scaffoldBackgroundColor: scheme.surface,
+        scaffoldBackgroundColor: const Color(0xFFF6F8FB),
         appBarTheme: AppBarTheme(
           centerTitle: false,
           elevation: 0,

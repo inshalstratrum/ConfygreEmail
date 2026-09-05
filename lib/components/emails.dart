@@ -59,6 +59,8 @@ Future<void> getEmails() async {
     gmailApi = gMail.GmailApi(authenticateClient);
 
     String? nextPageToken;
+    int pageCount = 0;
+    const int maxPages = 2; // Limit to 2 pages initially
 
     // Fetch messages
     do {
@@ -77,10 +79,11 @@ Future<void> getEmails() async {
         results = await gmailApi.users.messages.list(
           "me",
           pageToken: nextPageToken,
+          maxResults: 25,
         );
       } else {
         results = await gmailApi.users.messages
-            .list("me", pageToken: nextPageToken, q: query);
+            .list("me", pageToken: nextPageToken, q: query, maxResults: 25);
       }
 
       //Check if results.messages is not null before iterating
@@ -164,7 +167,8 @@ Future<void> getEmails() async {
 
       // Update the nextPageToken for the next iteration
       nextPageToken = results.nextPageToken;
-    } while (nextPageToken != null && await googleSignIn.isSignedIn());
+      pageCount++;
+    } while (nextPageToken != null && await googleSignIn.isSignedIn() && pageCount < maxPages);
 
     if (!await googleSignIn.isSignedIn())
       print("signed out");
@@ -190,28 +194,21 @@ class GoogleAuthClient extends http.BaseClient {
 }
 
 Future<int> getEmailCount(String emailAddress) async {
-  String? nextPageTokenForSingleMail;
   int count = 0;
   emailIdsToDelete.clear();
 
-  do {
-    gMail.ListMessagesResponse response = await gmailApi.users.messages.list(
-      "me",
-      q: 'from:$emailAddress',
-      pageToken:
-          nextPageTokenForSingleMail, // Use the token to get the next page
-    );
+  // Use a fast estimated batch query with maxResults to avoid quota issues
+  final response = await gmailApi.users.messages.list(
+    "me",
+    q: 'from:$emailAddress',
+    maxResults: 100, // Fast batch query to estimate count
+  );
 
-    // Add the number of messages retrieved in the current response
-    count += response.messages?.length ?? 0;
+  // Add the number of messages retrieved in the current response
+  count += response.messages?.length ?? 0;
 
-    emailIdsToDelete.addAll(
-        response.messages?.map((message) => message.id!).toList() ?? []);
-
-    // Update the nextPageToken for the next iteration
-    nextPageTokenForSingleMail = response.nextPageToken;
-  } while (nextPageTokenForSingleMail !=
-      null); // Continue until there are no more pages
+  emailIdsToDelete.addAll(
+      response.messages?.map((message) => message.id!).toList() ?? []);
 
   return count;
 }

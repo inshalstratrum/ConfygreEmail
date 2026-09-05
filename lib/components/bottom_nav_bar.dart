@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 
 class MyBottomNavBar extends StatelessWidget {
   void Function(int)? onTabChange;
@@ -10,33 +9,34 @@ class MyBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.symmetric(vertical: 20),
-        child: GNav(
-            color: Colors.grey.shade700,
-            activeColor: Colors.grey[900],
-            tabBackgroundColor: Colors.grey.shade100,
-            mainAxisAlignment: MainAxisAlignment.center,
-            tabBorderRadius: 16,
-            onTabChange: (value) => onTabChange!(value),
-            tabs: const [
-              GButton(
-                icon: Icons.swap_horiz_rounded,
-                textStyle: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              GButton(
-                icon: Icons.table_chart_rounded,
-                textStyle: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              GButton(
-                icon: Icons.settings_suggest_rounded,
-                textStyle: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              GButton(
-                icon: Icons.account_circle_rounded,
-                textStyle: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ])
+    return NavigationBar(
+      height: 70,
+      elevation: 0,
+      backgroundColor: const Color(0xFFF6F8FB),
+      selectedIndex: 0,
+      onDestinationSelected: (value) => onTabChange!(value),
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.clean_hands_rounded),
+          selectedIcon: Icon(Icons.clean_hands_rounded, color: Color(0xFF496A8F)),
+          label: 'Clean',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.history_rounded),
+          selectedIcon: Icon(Icons.history_rounded, color: Color(0xFF496A8F)),
+          label: 'History',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.settings_rounded),
+          selectedIcon: Icon(Icons.settings_rounded, color: Color(0xFF496A8F)),
+          label: 'Settings',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person_rounded),
+          selectedIcon: Icon(Icons.person_rounded, color: Color(0xFF496A8F)),
+          label: 'Profile',
+        ),
+      ],
     );
   }
 }

@@ -72,13 +72,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: const Color(0xFFF6F8FB),
       appBar: AppBar(
         title: Text(
           pageTile,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFFF6F8FB),
         elevation: 0,
         leading: Builder(
             builder: (context) => IconButton(
@@ -226,7 +226,10 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: MyBottomNavBar(
         onTabChange: (index) => navigationBottomBar(index),
       ),
