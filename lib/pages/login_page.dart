@@ -79,6 +79,63 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.deepPurple.shade100, width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.deepPurple.withOpacity(0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.verified, color: Colors.deepPurple.shade700, size: 20),
+                          const SizedBox(width: 6),
+                          Text(
+                            '🔥 Fast Email Access (\$10 / Month)',
+                            style: TextStyle(
+                              color: Colors.deepPurple.shade900,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Clean thousands of messy emails with 1-click unsubscribe and bulk deletion! Get your account approved as an authorized user within 6–12 hours.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12.5, color: Colors.black87, height: 1.3),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple.shade50,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: SelectableText(
+                          'Contact: inshal.stratum@gmail.com',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.deepPurple.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

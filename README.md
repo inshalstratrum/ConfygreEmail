@@ -9,11 +9,25 @@ Confygre Email is a powerful, open source app designed to simplify your email ma
 ![Image](banner.png)
 
 
-## Download Confygre Email App
-- You can download the app from the release page 👉[here](https://github.com/confygregit/ConfygreEmail/tags)
-- By default, there is alread an API key created using confygre@gmail.com. But it's not verified. It will show you warning message when singin in.
-- Please check the project id in the warnign prompt. It must be: ###########
-- Your own Gmail Auth API key can be added in the app if you don't want to use default API key.
+## 💎 Special Offer: Unlock Full Access for $10 / Month!
+
+Is your Gmail inbox cluttered with thousands of unread promotions, newsletters, and spam? 
+
+Get instant, unrestricted access to the **Confygre Email Android & Desktop apps** to clean and organize your entire inbox in minutes:
+- ⚡ **1-Click Unsubscribe & Bulk Delete**: Declutter years of junk mail with a single tap.
+- 🚀 **Fast Turnaround**: Email your Google account ID to **[inshal.stratum@gmail.com](mailto:inshal.stratum@gmail.com)**, and your account will be approved as an authorized user within **6 to 12 hours**!
+- 🔒 **Zero Hassle**: Once approved, simply tap **Sign in with Google** in either the Android or Desktop app to manage your inbox with full speed.
+- 💰 **Affordable**: Only **\$10/month** for a full month of clean, organized email management.
+
+👉 **To get started:** Send an email to **inshal.stratum@gmail.com** with the subject `Confygre Email Access Request`.
+
+---
+
+## 📥 Download Confygre Email (Android & Windows Desktop)
+
+- **Android APK**: Download the latest release from the [Releases Page](https://github.com/inshalstratrum/ConfygreEmail/releases) (`confygre-email-release.apk` or `app-release.apk`).
+- **Windows Desktop**: Download `confygre-email-desktop.exe` or `confygre-email-windows-x64.zip` from the [release/ folder](./release) or [Releases Page](https://github.com/inshalstratrum/ConfygreEmail/releases). Double-click to run on Windows immediately!
+
 
 
 ## Local Development
