@@ -7,5 +7,6 @@ Confygre Email maintenance documentation is intentionally numbered so the operat
 3. [03 - Testing and Safety](03%20-%20Testing%20and%20Safety.md)
 4. [04 - Repository and Maintenance](04%20-%20Repository%20and%20Maintenance.md)
 5. [05 - Audit Remediation Status](05%20-%20Audit%20Remediation%20Status.md)
+6. [06 - Owner Release Checklist](06%20-%20Owner%20Release%20Checklist.md)
 
 Use the audit-remediation status as the handoff/checklist file. Do not duplicate these notes into additional similarly named documents.
