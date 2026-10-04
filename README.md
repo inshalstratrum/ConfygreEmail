@@ -102,6 +102,7 @@ Permanent deletion is opt-in and requires explicit confirmation. Empty Trash is 
 3. [03 - Testing and Safety](docs/03%20-%20Testing%20and%20Safety.md)
 4. [04 - Repository and Maintenance](docs/04%20-%20Repository%20and%20Maintenance.md)
 5. [05 - Audit Remediation Status](docs/05%20-%20Audit%20Remediation%20Status.md)
+6. [06 - Owner Release Checklist](docs/06%20-%20Owner%20Release%20Checklist.md)
 
 ## Support
 
