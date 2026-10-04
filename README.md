@@ -42,6 +42,8 @@ See [Security and OAuth](docs/01%20-%20Security%20and%20OAuth.md).
 
 Use the [GitHub Releases](https://github.com/inshalstratrum/ConfygreEmail/releases) page for packaged builds.
 
+**Legacy-release warning:** releases produced before the hardened signing workflow used the older release process and may have been debug-signed. The next production Android release should be created only after the stable signing secrets are configured and the workflow's APK-signature verification passes.
+
 Generated APK, EXE, and ZIP artifacts are intentionally no longer stored in the source tree.
 
 ## Development
@@ -94,6 +96,7 @@ Permanent deletion is opt-in and requires explicit confirmation. Empty Trash is 
 
 ## Documentation
 
+0. [00 - Documentation Index](docs/00%20-%20Documentation%20Index.md)
 1. [01 - Security and OAuth](docs/01%20-%20Security%20and%20OAuth.md)
 2. [02 - Release and Signing](docs/02%20-%20Release%20and%20Signing.md)
 3. [03 - Testing and Safety](docs/03%20-%20Testing%20and%20Safety.md)
