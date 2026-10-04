@@ -3,7 +3,7 @@ import '../models/tiles_data_model.dart';
 import '../models/email_data_model.dart';
 import '../components/GlobalVariables.dart';
 import '../components/emails.dart';
-import '../models/email_string_model.dart';
+import '../components/email_parsing.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'mail_list_page.dart';
@@ -13,27 +13,6 @@ class Tiles extends StatefulWidget {
 
   @override
   State<Tiles> createState() => _TilesState();
-}
-
-EmailStringModel? processEmailString(String input) {
-  try {
-    EmailStringModel emailStringModel = EmailStringModel();
-    if (input.contains('<') && input.contains('>')) {
-      final name = input.substring(0, input.indexOf('<')).trim();
-      final email = input.substring(input.indexOf('<') + 1, input.indexOf('>')).trim();
-      emailStringModel.name = name;
-      emailStringModel.email = email;
-      return emailStringModel;
-    } else {
-      final name = input.substring(0, input.indexOf('@')).trim();
-      final email = input.substring(input.indexOf('@') + 1, input.length).trim();
-      emailStringModel.name = name;
-      emailStringModel.email = email;
-      return emailStringModel;
-    }
-  } catch (e) {
-    return null;
-  }
 }
 
 class _TilesState extends State<Tiles> {

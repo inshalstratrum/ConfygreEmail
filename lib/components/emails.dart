@@ -1,4 +1,5 @@
 import '../models/email_string_model.dart';
+import 'email_parsing.dart';
 import '../models/parse_unsubscribe_string_model.dart';
 import '../models/skipped_emails_history_model.dart';
 import 'package:http/http.dart' as http;
