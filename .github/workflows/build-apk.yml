@@ -62,7 +62,14 @@ jobs:
           EOF
 
       - name: Build signed release APK
-        run: flutter build apk --release
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION_NAME="${GITHUB_REF_NAME#v}"
+          else
+            VERSION_NAME="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f1)"
+          fi
+          flutter build apk --release --build-name="$VERSION_NAME" --build-number="$GITHUB_RUN_NUMBER"
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
