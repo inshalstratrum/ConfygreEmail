@@ -22,6 +22,8 @@ Last reviewed: 2026-10-04
 - [x] Corrected README links to the maintained fork and standardized contact information.
 - [x] Added numbered security, release, testing, and repository documentation.
 - [x] Corrected the OAuth settings source filename to Dart-style `oauth_setting_page.dart`.
+- [x] Added weekly Dependabot checks for Dart/Flutter packages and GitHub Actions.
+- [x] Upgraded official GitHub checkout/setup-java actions to Node 24-compatible major versions.
 
 ## Owner-only actions still required outside the repository
 
