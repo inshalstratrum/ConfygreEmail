@@ -1,9 +1,9 @@
 import 'package:Confygre_Email/models/oauth_model.dart';
-import 'package:Confygre_Email/models/user_credential_model.dart';
 import 'package:Confygre_Email/pages/oAuth_setting_page.dart';
 import 'package:flutter/material.dart';
 
 import 'components/objectBox.dart';
+import 'components/gmail_auth.dart';
 import 'objectbox.g.dart';
 import 'pages/intro_screen_page.dart';
 import 'pages/login_page.dart';
@@ -13,22 +13,27 @@ import 'components/GlobalVariables.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   objectBox = await ObjectBox.init();
-  runApp(const MyApp());
+
+  // Purge tokens written by older versions to the ordinary ObjectBox database.
+  objectBox?.removeUserCredential();
+  final hasAuthSession = await hasStoredAuthSession();
+
+  runApp(MyApp(hasAuthSession: hasAuthSession));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool hasAuthSession;
+
+  const MyApp({super.key, required this.hasAuthSession});
 
   @override
   Widget build(BuildContext context) {
     bool toHome = true;
     Widget widget = OauthSettingPage();
     final OauthModel? oauthModel = objectBox?.getOAuthData();
-    final UserCredentialModel? userCredential = objectBox?.getUserCredential();
     
-    // Check if we have valid OAuth config and user credentials for auto-login
-    if (oauthModel != null && userCredential != null) {
-      // Auto-login: route directly to HomePage
+    // Authentication tokens live in platform secure storage, not ObjectBox.
+    if (oauthModel != null && hasAuthSession) {
       widget = HomePage();
     } else if (oauthModel != null) {
       widget = LoginPage();

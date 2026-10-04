@@ -15,8 +15,6 @@ String emailId = "";
 String emailSubject = "";
 String emailSenderName = "loading...";
 String emailSenderEmail = "";
-String? userAccessToken;
-String? userIdToken;
 bool isOneClickUnsub = true;
 String mailToString = "";
 String mailToSubject = "";
@@ -79,10 +77,6 @@ final String desktopOAuthClientId = String.fromCharCodes([
   106, 99, 104, 117, 116, 104, 105, 117, 51, 115, 46, 97, 112, 112, 115, 46,
   103, 111, 111, 103, 108, 101, 117, 115, 101, 114, 99, 111, 110, 116, 101,
   110, 116, 46, 99, 111, 109
-]);
-final String desktopOAuthClientSecret = String.fromCharCodes([
-  71, 79, 67, 83, 80, 88, 45, 71, 66, 69, 77, 66, 112, 114, 71, 69, 110, 106,
-  76, 120, 112, 51, 72, 89, 83, 72, 103, 112, 53, 109, 75, 114, 66, 109, 104
 ]);
 
 String getDateTimeInUTC() {

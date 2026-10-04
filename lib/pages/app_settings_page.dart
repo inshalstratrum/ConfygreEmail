@@ -64,7 +64,34 @@ class _AppSettingsState extends State<AppSettings> {
           const SizedBox(height: 4),
           Text('Choose how cleanup actions should work. You can change these at any time.', style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 14),
-          _toggle(title: 'Permanent delete', subtitle: 'Delete immediately instead of moving mail to Trash.', value: permanentDelete, onChanged: (v) => permanentDelete = v),
+          Card(
+            color: permanentDelete ? Theme.of(context).colorScheme.errorContainer : null,
+            child: SwitchListTile.adaptive(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+              title: const Text('Permanent delete', style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: const Text('Irreversibly delete selected mail instead of moving it to Trash. Every permanent action still requires confirmation.'),
+              value: permanentDelete,
+              onChanged: (next) async {
+                if (next) {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Enable permanent deletion?'),
+                      content: const Text('Permanently deleted Gmail messages cannot be restored. You will still be asked to confirm each permanent deletion.'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                        FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Enable')),
+                      ],
+                    ),
+                  );
+                  if (confirmed != true) return;
+                }
+                if (!mounted) return;
+                setState(() => permanentDelete = next);
+                _save();
+              },
+            ),
+          ),
           const SizedBox(height: 8),
           _toggle(title: 'Block the sender', subtitle: 'Keep the existing sender-blocking preference enabled for cleanup.', value: blockTheSender, onChanged: (v) => blockTheSender = v),
           const SizedBox(height: 8),
@@ -91,6 +118,6 @@ class _AppSettingsState extends State<AppSettings> {
   Future<void> _emptyTrash() async {
     final confirmed = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: const Text('Empty Trash permanently?'), content: const Text('This action cannot be undone.'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Empty Trash'))]));
     if (confirmed != true) return;
-    try { await emptyTrash(); if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trash emptied.'))); } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not empty Trash: $e'))); }
+    try { await emptyTrash(confirmed: true); if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trash emptied.'))); } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not empty Trash: $e'))); }
   }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 
 import '../components/emails.dart';
+import '../components/GlobalVariables.dart';
 import '../components/skeleton.dart';
 import '../state/mailbox_controller.dart';
 
@@ -38,20 +39,31 @@ class _MailboxViewState extends State<_MailboxView> {
     final controller = context.read<MailboxController>();
     final ids = id == null ? controller.selected.toList() : [id];
     if (ids.isEmpty) return;
+    final irreversible = permanentDelete;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Move to Trash?'),
-        content: Text('${ids.length} message(s) will be moved to Gmail Trash.'),
+        title: Text(irreversible ? 'Permanently delete?' : 'Move to Trash?'),
+        content: Text(
+          irreversible
+              ? '${ids.length} message(s) will be permanently deleted. This cannot be undone.'
+              : '${ids.length} message(s) will be moved to Gmail Trash.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton.tonal(onPressed: () => Navigator.pop(context, true), child: const Text('Move to Trash')),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(irreversible ? 'Delete permanently' : 'Move to Trash'),
+          ),
         ],
       ),
     );
     if (confirmed != true) return;
     try {
-      await deleteSelectedMessages(ids);
+      await deleteSelectedMessages(
+        ids,
+        confirmedPermanentDelete: irreversible,
+      );
       controller.removeFromView(ids);
       if (mounted) _notice('${ids.length} message(s) moved to Trash.');
     } catch (e) {
@@ -202,7 +214,7 @@ class _MailboxViewState extends State<_MailboxView> {
   Future<void> _emptyTrash(MailboxController controller) async {
     final confirmed = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: const Text('Empty Trash permanently?'), content: const Text('This cannot be undone.'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Empty Trash'))]));
     if (confirmed != true) return;
-    await emptyTrash();
+    await emptyTrash(confirmed: true);
     if (mounted) { _notice('Trash emptied.'); controller.load(force: true); }
   }
 }

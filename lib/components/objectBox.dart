@@ -99,13 +99,13 @@ class ObjectBox {
     _userCredentialBox.put(userCredentialModel);
   }
 
+  /// Removes only legacy plaintext authentication records.
+  ///
+  /// Older builds stored OAuth tokens in ObjectBox. Authentication is now kept
+  /// in platform secure storage, so signing out must not erase cleanup history
+  /// or user preferences.
   void removeUserCredential() {
-    _appSettingsBox.removeAll();
     _userCredentialBox.removeAll();
-    _unsubscribedEmailListBox.removeAll();
-    _skippedEmailListBox.removeAll();
-    _checkedEmails.removeAll();
-    _tilesDataBox.removeAll();
   }
 
   //App Settings

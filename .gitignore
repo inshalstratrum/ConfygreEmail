@@ -1,13 +1,42 @@
-# iOS/XCode related
-ios/
-Flutter/ephemeral/
-Pods/
-macos/
-xcuserdata/
-windows/
-linux/
-web/
-android/
+# Flutter / Dart
 .dart_tool/
-.idea/
+.packages
 build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Editors
+.idea/
+.vscode/
+*.iml
+
+# Platform-generated / local files
+android/.gradle/
+android/local.properties
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
+key.properties
+ios/Pods/
+macos/Pods/
+**/Flutter/ephemeral/
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Signing material and secrets
+*.jks
+*.keystore
+.env
+.env.*
+!.env.example
+
+# Release artifacts belong in GitHub Releases, not source control
+release/
+*.apk
+*.aab
+*.exe
+*.zip
+
+# OS noise
+.DS_Store
+Thumbs.db

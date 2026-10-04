@@ -162,19 +162,11 @@ class _TilesState extends State<Tiles> {
             await showEmailDataOrWait();
           }
         } catch (e) {
-          try {
-            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-              googleSignIn.signOut();
-            }
-            objectBox?.removeUserCredential();
-            gettingEmails = false;
-            if (mounted) {
-              Future.delayed(const Duration(seconds: 1), () {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-              });
-            }
-          } catch (ex) {
-            print(ex);
+          gettingEmails = false;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Could not load Gmail: $e')),
+            );
           }
         } finally {
           if (mounted) {
