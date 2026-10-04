@@ -1,64 +1,113 @@
-
 # Confygre Email
 
-Confygre Email is a powerful, open source app designed to simplify your email management. With features like one click unsubscribe, unlimited email deletion, and efficient inbox cleaning, Confygre Email helps you regain control of your inbox effortlessly. Created by a passionate developer, it’s built to offer a seamless, ad free experience with no restrictions. Clean, organize, and declutter your inbox with Confygre Email today!
+**Confygre Email** is a Flutter-based Gmail cleanup application for Android and desktop. It helps users review senders, unsubscribe from mailing lists, move bulk mail to Trash, and optionally perform explicitly confirmed permanent cleanup actions.
 
-**Currently in Beta**: I am new to app development. This app may contains some issue.
+This repository is a maintained GPL-3.0 fork of [confygregit/ConfygreEmail](https://github.com/confygregit/ConfygreEmail) with additional desktop support, mailbox tooling, security hardening, CI, and release automation.
 
-## Screenshot
-![Image](banner.png)
+## Current status
 
+The project is in active beta. Gmail cleanup operations can modify or permanently delete mail, so users should test with non-critical accounts before relying on it for important inboxes.
 
-## 💎 Special Offer: Unlock Full Access for $10 / Month!
+## Key features
 
-Is your Gmail inbox cluttered with thousands of unread promotions, newsletters, and spam? 
+- Gmail sender cleanup and bulk review
+- One-click unsubscribe support where senders provide standard unsubscribe metadata
+- Inbox/category filtering
+- Android and desktop Flutter targets
+- OAuth authentication for mobile and desktop
+- Desktop OAuth Authorization Code + PKCE
+- Platform secure storage for authentication tokens
+- Gmail Trash as the default delete path
+- Explicit confirmation gates for permanent deletion and Empty Trash
+- Local cleanup history and preferences
+- GitHub Actions CI and signed Android release workflow
 
-Get instant, unrestricted access to the **Confygre Email Android & Desktop apps** to clean and organize your entire inbox in minutes:
-- ⚡ **1-Click Unsubscribe & Bulk Delete**: Declutter years of junk mail with a single tap.
-- 🚀 **Fast Turnaround**: Email your Google account ID to **[inshal.stratum@gmail.com](mailto:inshal.stratum@gmail.com)**, and your account will be approved as an authorized user within **6 to 12 hours**!
-- 🔒 **Zero Hassle**: Once approved, simply tap **Sign in with Google** in either the Android or Desktop app to manage your inbox with full speed.
-- 💰 **Affordable**: Only **\$10/month** for a full month of clean, organized email management.
+## Security changes
 
-👉 **To get started:** Send an email to **inshal.stratum@gmail.com** with the subject `Confygre Email Access Request`.
+Recent security hardening includes:
 
----
+- removed the embedded desktop OAuth client secret from the current source;
+- replaced secret-based installed-app OAuth with PKCE;
+- moved OAuth tokens out of ObjectBox and into platform secure storage;
+- added refresh-token handling for desktop sessions;
+- reduced Gmail scopes from full mailbox access to `gmail.modify` plus `gmail.send`;
+- added explicit application guards for irreversible Gmail operations;
+- removed debug-signing fallback for Android release builds.
 
-## 📥 Download Confygre Email (Android & Windows Desktop)
+See [Security and OAuth](docs/01%20-%20Security%20and%20OAuth.md).
 
-- **Android APK**: Download the latest release from the [Releases Page](https://github.com/inshalstratrum/ConfygreEmail/releases) (`confygre-email-release.apk` or `app-release.apk`).
-- **Windows Desktop**: Download `confygre-email-desktop.exe` or `confygre-email-windows-x64.zip` from the [release/ folder](./release) or [Releases Page](https://github.com/inshalstratrum/ConfygreEmail/releases). Double-click to run on Windows immediately!
+> **Important owner action:** the historical desktop OAuth secret must still be rotated/revoked in Google Cloud because older public Git commits remain retrievable.
 
+## Downloads
 
+Use the [GitHub Releases](https://github.com/inshalstratrum/ConfygreEmail/releases) page for packaged builds.
 
-## Local Development
+Generated APK, EXE, and ZIP artifacts are intentionally no longer stored in the source tree.
 
-To build this app, please follow the below steps
+## Development
 
-- Install and setup [Android Studio](https://developer.android.com/studio)
-- Copy and pase this in your cmd or terminal `https://github.com/confygregit/ConfygreEmail.git`
-- Open the cloned project in your Android Studio and make a build
-- You need to build the app with the key files, this is required for SHA1 key which will be required for oAuth key generation.
+Requirements:
 
+- Flutter stable
+- Dart compatible with the version declared in `pubspec.yaml`
+- Android Studio / Android SDK for Android builds
+- a Google OAuth configuration suitable for the platform being tested
 
-## Usage
+Clone the maintained fork:
 
-- SignIn in the app with your Gmail account
-- In the home page you will get email accounts from your inbox with the following options,
-    - **Unsubscribe**: will uninstall and delete all the emails from the sender.
-    - **Delete**: will delete all the emails but won't unsibscribe.
-    - **Skip**: will not delete and unsubscribe. Email will added to the whitelist.
-- Some emails cannot be unsubscribed, but they can still be deleted.
+```bash
+git clone https://github.com/inshalstratrum/ConfygreEmail.git
+cd ConfygreEmail
+flutter pub get
+flutter analyze --no-fatal-infos --no-fatal-warnings
+flutter test
+```
 
-## Use your own oAuth
-Use the below SHA-1 and create an Android firebase project to make your own oAuth key. You can use this oAuth in the app.
+## Android release signing
 
-PackageName: com.confygre.email
-SHA-1: c2:9c:08:fe:d5:25:c2:f2:b5:e4:07:3f:39:87:62:d2:57:17:12:6a
+Release CI requires a stable signing keystore supplied through GitHub repository secrets:
 
-## Have any issues?
-Please raise an issue from issue tab: [Issues](https://github.com/confygregit/ConfygreEmail/issues) or send en email to **confygre@gmail.com**
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+- `ANDROID_STORE_PASSWORD`
 
+The release workflow refuses to depend on Android debug signing for production APKs.
 
+See [Release and Signing](docs/02%20-%20Release%20and%20Signing.md).
+
+## Gmail permissions
+
+The maintained implementation requests:
+
+- `gmail.modify` — list, label, trash, and modify mail;
+- `gmail.send` — send unsubscribe email requests when a sender provides a `mailto:` unsubscribe method;
+- OpenID/profile/email identity scopes for desktop sign-in.
+
+It no longer requests the broader `https://mail.google.com/` scope.
+
+## Destructive-operation policy
+
+Normal delete flows move messages to Gmail Trash.
+
+Permanent deletion is opt-in and requires explicit confirmation. Empty Trash is also guarded by an explicit irreversible-action confirmation.
+
+## Documentation
+
+1. [01 - Security and OAuth](docs/01%20-%20Security%20and%20OAuth.md)
+2. [02 - Release and Signing](docs/02%20-%20Release%20and%20Signing.md)
+3. [03 - Testing and Safety](docs/03%20-%20Testing%20and%20Safety.md)
+4. [04 - Repository and Maintenance](docs/04%20-%20Repository%20and%20Maintenance.md)
+5. [05 - Audit Remediation Status](docs/05%20-%20Audit%20Remediation%20Status.md)
+
+## Support
+
+Repository Issues are currently disabled at the GitHub settings level. Until they are enabled, use the guidance in [SUPPORT.md](SUPPORT.md).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
-The app is available as open source under the terms of the GPL License.
+
+GPL-3.0. See [LICENSE](LICENSE).

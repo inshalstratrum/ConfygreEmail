@@ -1,6 +1,4 @@
 import 'package:Confygre_Email/models/oauth_model.dart';
-import 'package:Confygre_Email/pages/oAuth_setting_page.dart';
-import 'package:flutter/material.dart';
 import '../components/GlobalVariables.dart';
 import '../components/emails.dart';
 import '../models/checked_emails_model.dart';

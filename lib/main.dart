@@ -1,10 +1,9 @@
 import 'package:Confygre_Email/models/oauth_model.dart';
-import 'package:Confygre_Email/pages/oAuth_setting_page.dart';
+import 'package:Confygre_Email/pages/oauth_setting_page.dart';
 import 'package:flutter/material.dart';
 
 import 'components/objectBox.dart';
 import 'components/gmail_auth.dart';
-import 'objectbox.g.dart';
 import 'pages/intro_screen_page.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';

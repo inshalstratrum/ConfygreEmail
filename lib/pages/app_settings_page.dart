@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../components/GlobalVariables.dart';
 import '../components/emails.dart';
-import '../components/objectBox.dart';
 import '../models/app_settings_model.dart';
 
 class AppSettings extends StatefulWidget {

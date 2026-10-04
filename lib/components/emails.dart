@@ -1,16 +1,9 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import '../models/email_string_model.dart';
 import '../models/parse_unsubscribe_string_model.dart';
 import '../models/skipped_emails_history_model.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:app_state/app_state.dart';
 import 'package:googleapis/gmail/v1.dart' as gMail;
 import '../models/email_data_model.dart';
-import '../pages/login_page.dart';
-import '../pages/tiles_page.dart';
 import 'GlobalVariables.dart';
 import 'gmail_auth.dart';
 import 'dart:convert';

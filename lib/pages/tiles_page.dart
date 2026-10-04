@@ -1,13 +1,9 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/tiles_data_model.dart';
 import '../models/email_data_model.dart';
 import '../components/GlobalVariables.dart';
 import '../components/emails.dart';
-import '../components/gmail_auth.dart';
 import '../models/email_string_model.dart';
-import 'login_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'mail_list_page.dart';
@@ -75,8 +71,7 @@ class _TilesState extends State<Tiles> {
 
   void checkNewVersion() async {
     try {
-      PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      // String currentVersion = packageInfo.version;
+      await PackageInfo.fromPlatform();
     } catch (_) {}
   }
 
