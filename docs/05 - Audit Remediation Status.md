@@ -16,6 +16,7 @@ Last reviewed: 2026-10-04
 - [x] Reworked release automation to require stable signing secrets.
 - [x] Added `flutter analyze` and `flutter test` CI.
 - [x] Added destructive-operation safety tests.
+- [x] CI now passes analysis, tests, and an Android debug APK smoke build on `main`.
 - [x] Corrected `.gitignore` so Flutter platform source directories remain tracked.
 - [x] Removed generated APK/EXE/ZIP files from the current source tree.
 - [x] Corrected README links to the maintained fork and standardized contact information.
@@ -34,8 +35,10 @@ These cannot be completed through source commits alone:
    - `ANDROID_STORE_PASSWORD`
 3. **Enable GitHub Issues** if public issue-based support is desired.
 4. **Add GitHub repository topics/description** for discoverability.
-5. Review the existing `Shalifeos` repository ruleset and ensure it explicitly targets the intended protected branch/ref.
+5. Review the existing `Shalifeos` repository ruleset. Its current ref condition reports an empty include list, so explicitly set the intended protected branch/ref.
 
 ## History note
 
 Large release binaries and the historical OAuth secret still exist in old Git history. The current branch no longer references those release artifacts, but complete physical removal from history would require an intentional history rewrite and coordination with all clones/forks.
+
+See [06 - Owner Release Checklist](06%20-%20Owner%20Release%20Checklist.md) for the remaining owner-only release steps.
